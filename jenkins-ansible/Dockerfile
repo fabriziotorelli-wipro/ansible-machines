@@ -64,4 +64,7 @@ WORKDIR /usr/local/share/ansible/playbook
 
 CMD ["/bin/bash", "-c", "run_ansible_playbook.sh"]
 
+EXPOSE  8080
+EXPOSE 50000
+
 #ENTRYPOINT ["/bin/bash"]
