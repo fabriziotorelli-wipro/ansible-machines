@@ -61,6 +61,4 @@ if [[ -z "$INSTALLED" ]]; then
 fi
 echo "All done!!"
 sudo su jenkins
-#while (true) do sleep 86400; done
-watch -n 86400 /usr/local/share/ansible/playbook/run_ansible_playbook.sh
-#dr_scripts_ref
+jenkins.sh
