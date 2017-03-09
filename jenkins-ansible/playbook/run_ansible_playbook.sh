@@ -1,13 +1,15 @@
 #!/bin/bash
 /usr/sbin/init
 
-PREPARED="$(ls /opt/ansible/playbook/.prepared)"
+PREPARED="$(ls /usr/local/share/ansible/playbook/.prepared)"
 if [[ -z "$PREPARED" ]]; then
+
 #  ansible-playbook -c local -i ./inventory/localhost  playbook.yml
   echo "Configuring ansible host to : $ANSIBLE_HOSTNAME"
   echo "Configuring machine host to : $HOSTNAME"
   echo "Configuring machine riglet domain to : $RIGLETDOMAIN"
   echo "127.0.0.1  $HOSTNAME   $HOSTNAME.$RIGLETDOMAIN" > /etc/hosts
+  hostname $HOSTNAME
   cp ./inventory/localhost ./inventory/$ANSIBLE_HOSTNAME
   echo "$ANSIBLE_HOSTNAME      ansible_connection=local" >> ./inventory/$ANSIBLE_HOSTNAME
   git config --global --add user.name $USER_NAME
@@ -37,7 +39,7 @@ if [[ -z "$PREPARED" ]]; then
   touch ./.prepared
 fi
 
-INSTALLED="$(ls /opt/ansible/playbook/.installed)"
+INSTALLED="$(ls /usr/local/share/ansible/playbook/.installed)"
 FAILED=""
 if [[ -z "$INSTALLED" ]]; then
 #  ansible-playbook -c local -i ./inventory/localhost  playbook.yml
@@ -46,7 +48,7 @@ if [[ -z "$INSTALLED" ]]; then
   for i in ${PLAYBOOKS//,/ }
     do
         if [[ -e ./$i.yml ]]; then
-          ansible-playbook -i /opt/ansible/playbook/inventory/$ANSIBLE_HOSTNAME -e @vars -e @inputs -e @private -e @/opt/ansible/playbook/vars ./$i.yml
+          ansible-playbook -i /usr/local/share/ansible/playbook/inventory/$ANSIBLE_HOSTNAME -e @vars -e @inputs -e @private -e @/usr/local/share/ansible/playbook/vars ./$i.yml
         else
           FAILED="1"
           echo "Required role $i.yml doesn't exist ..."
@@ -58,7 +60,7 @@ if [[ -z "$INSTALLED" ]]; then
   fi
 fi
 echo "All done!!"
-
+sudo su jenkins
 #while (true) do sleep 86400; done
-watch -n 86400 /opt/ansible/run_ansible_playbook.sh
+watch -n 86400 /usr/local/share/ansible/playbook/run_ansible_playbook.sh
 #dr_scripts_ref
