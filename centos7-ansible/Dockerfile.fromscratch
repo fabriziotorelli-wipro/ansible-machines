@@ -1,0 +1,21 @@
+FROM centos
+
+MAINTAINER Fabrizio Torelli (fabrizio.torelli@wipro.com)
+
+USER root
+
+RUN yum -y install epel-release deltarpm
+
+RUN yum -y  install --skip-broken git python python-pip python-devel libffi-dev libssl-dev libxml2-dev libxslt1-dev \
+            libjpeg8-dev zlib1g-dev gcc rpm-build make asciidoc python-setuptools openssl openssl-devel \
+            vim curl wget zip
+
+RUN pip install ansible httplib2 docker-py
+
+RUN mkdir -p /root/playbook/inventory
+
+COPY localhost /root/playbook/playbook/inventory/localhost
+
+WORKDIR /root/playbook
+
+ENTRYPOINT ["/bin/bash"]

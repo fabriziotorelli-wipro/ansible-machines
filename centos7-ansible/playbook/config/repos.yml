@@ -1,0 +1,6 @@
+- hosts: localhost
+  tasks:
+    - name: push main repo
+      shell: git clone {{ main_url }} ./main && cd ./main && git checkout {{ main_branch }}
+    - name: push roles repo
+      shell: git clone {{ roles_url }} ./main && cd ./main && git checkout {{ roles_branch }}
