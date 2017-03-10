@@ -1,8 +1,29 @@
 #!/bin/bash
 
 PREPARED="$(ls /usr/local/share/ansible/playbook/.prepared)"
-if [[ -z "$PREPARED" ]]; then
 
+if [[ -z "$PREPARED" ]]; then
+  echo "Removing private key ..."
+  rm -f /root/.ssh/id_rsa
+  echo "Removing public key ..."
+  rm -f /root/.ssh/id_rsa.pub
+  export CURRPWD="$PWD"
+  if ! [[ -z "$PRIVATE_PUBLIC_KEY_TAR_URL" ]]; then
+    echo "Importing private/public key ..."
+    wget "$PRIVATE_PUBLIC_KEY_TAR_URL" -O /root/keys.tar
+    if [[ -e /root/keys.tar ]]; then
+      echo "decompressing in .ssh path ..."
+      cd /root/.ssh
+      tar -xvf ../keys.tar
+      rm -f /root/keys.tar
+      cd $CURRPWD
+    fi
+  else
+    echo "Removing private key ..."
+    rm -f /root/.ssh/id_rsa
+    echo "Removing public key ..."
+    rm -f /root/.ssh/id_rsa.pub
+  fi
 #  ansible-playbook -c local -i ./inventory/localhost  playbook.yml
   echo "Configuring ansible host to : $ANSIBLE_HOSTNAME"
   echo "Configuring machine host to : $HOSTNAME"

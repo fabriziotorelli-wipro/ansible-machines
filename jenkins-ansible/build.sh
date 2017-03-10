@@ -1,4 +1,8 @@
 #!/bin/bash
+rm -f keys.tar
+cd keys
+tar -cvf ../keys.tar *
+cd ..
 EXISTS="$(docker images -a|grep 'buildit/jenkins-ansible')"
 if ! [[ -z "$EXISTS" ]]; then
   docker rmi -f builditftorelli/jenkins-ansible:2.32.3
