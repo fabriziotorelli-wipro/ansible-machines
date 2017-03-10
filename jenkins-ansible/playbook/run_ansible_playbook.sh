@@ -41,7 +41,7 @@ if [[ -z "$PREPARED" ]]; then
   fi
   echo "prepare command for jenkins stop ..."
   echo "#!/bin/sh" > /home/jenkins/stop-jenkins.sh
-  echo "ps -eaf | grep jenkins.sh | awk 'BEGIN {FS=OFS=" "}{print $2}'|xargs kill" >> /home/jenkins/stop-jenkins.sh
+  echo "ps -eaf | grep 'jenkins.sh' | grep -v grep | awk 'BEGIN {FS=OFS=\" \"}{print \$2}'|xargs kill" >> /home/jenkins/stop-jenkins.sh
   sudo mv /home/jenkins/stop-jenkins.sh /usr/local/bin/stop-jenkins.sh
   sudo chmod 777 /usr/local/bin/stop-jenkins.sh
   if ! [[ -z "$PLUGINS_TEXT_FILE_URL" ]]; then
@@ -53,7 +53,7 @@ if [[ -z "$PREPARED" ]]; then
       jenkins.sh &
       checkJenkinsIsUp
       echo "Running plugin procedure ..."
-      cat /usr/share/jenkins/ref/plugins.txt | xargs /usr/local/bin/plugins.sh
+      cat /usr/share/jenkins/ref/plugins.txt | xargs /usr/local/bin/install-plugins.sh
       echo "Stopping Jenkins"
       /usr/local/bin/stop-jenkins.sh
     fi
@@ -61,32 +61,29 @@ if [[ -z "$PREPARED" ]]; then
   echo "Configuring ansible host to : $ANSIBLE_HOSTNAME"
   echo "Configuring machine host to : $HOSTNAME"
   echo "Configuring machine riglet domain to : $RIGLETDOMAIN"
-  sudo cp /etc/hosts /home/jenkins/
-  sudo chown jenkins:jenkins hosts
+  sudo cat /etc/hosts > /home/jenkins/hosts
+  sudo chown jenkins:jenkins /home/jenkins/hosts
   echo "127.0.0.1  localhost localhost.localdomain localhost.$RIGLETDOMAIN" >> /home/jenkins/hosts
   echo "127.0.0.1  $HOSTNAME   $HOSTNAME.$RIGLETDOMAIN" >> /home/jenkins/hosts
-  sudo chown root:root /home/jenkins/hosts
-  sudo mv /home/jenkins/hosts /etc/hosts
-  sudo hostname $HOSTNAME
+  sudo su -c "cat /home/jenkins/hosts > /etc/hosts"
+  rm -f  /home/jenkins/hosts
+  echo "New hosts file :"
+  sudo echo /etc/hosts
   cp $PLAYBOOK_FOLDER/inventory/localhost $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
   echo "$ANSIBLE_HOSTNAME      ansible_connection=local" >> $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
   sudo git config --global --add user.name $USER_NAME
   sudo git config --global --add user.email $USER_EMAIL
-  sudo git clone $MAIN_REPO_URL $PLAYBOOK_FOLDER/main
-  sudo cd $PLAYBOOK_FOLDER/main
-  sudo git checkout $MAIN_REPO_BRANCH
-  sudo git fetch
-  sudo git pull
-  sudo rm -Rf .git
+  sudo su root -c "git clone $MAIN_REPO_URL $PLAYBOOK_FOLDER/main && cd $PLAYBOOK_FOLDER/main && git checkout $MAIN_REPO_BRANCH && git fetch && sudo git pull && rm -Rf .git"
   cd $PLAYBOOK_FOLDER
   sudo chown -Rf jenkins:jenkins $PLAYBOOK_FOLDER/main
   cp -f $PLAYBOOK_FOLDER/template/ansible.cfg $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER/
-  sudo git clone $ROLES_REPO_URL $PLAYBOOK_FOLDER/roles
-  sudo cd $PLAYBOOK_FOLDER/roles
-  sudo git checkout $ROLES_REPO_BRANCH
-  sudo git fetch
-  sudo git pull
-  sudo rm -Rf .git
+  # sudo git clone $ROLES_REPO_URL $PLAYBOOK_FOLDER/roles
+  # sudo cd $PLAYBOOK_FOLDER/roles
+  # sudo git checkout $ROLES_REPO_BRANCH
+  # sudo git fetch
+  # sudo git pull
+  # sudo rm -Rf .git
+  sudo su root -c "git clone $ROLES_REPO_URL $PLAYBOOK_FOLDER/roles && cd $PLAYBOOK_FOLDER/roles && git checkout $ROLES_REPO_BRANCH && git fetch && sudo git pull && rm -Rf .git"
   cd $PLAYBOOK_FOLDER
   sudo chown -Rf jenkins:jenkins $PLAYBOOK_FOLDER/roles
   #Fake prepare of variables
@@ -101,16 +98,22 @@ if [[ -z "$INSTALLED" ]]; then
   cd $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER
   for i in ${PLAYBOOKS//,/ }
     do
-        if [[ -e $PLAYBOOK_FOLDER/$i.yml ]]; then
-          ansible-playbook -i /usr/local/share/ansible/playbook/inventory/$ANSIBLE_HOSTNAME -e @vars -e @inputs -e @private -e @/usr/local/share/ansible/playbook/vars $PLAYBOOK_FOLDER/$i.yml
+        if [[ -e $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER/$i.yml ]]; then
+          ansible-playbook -i $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME -e @vars -e @inputs -e @private -e @$PLAYBOOK_FOLDER/vars ./$i.yml
         else
           FAILED="1"
           echo "Required role $i.yml doesn't exist ..."
         fi
     done
+  cd $PLAYBOOK_FOLDER
   if [[ -z "$FAILED" ]]; then
     touch $PLAYBOOK_FOLDER/.installed
   fi
+fi
+MACHINE_HOST="$(hostname)"
+if [[ "$HOSTNAME.$RIGLETDOMAIN" != "$MACHINE_HOST" ]]; then
+  echo "Setting up host to $HOSTNAME.$RIGLETDOMAIN ..."
+  sudo hostname $HOSTNAME.$RIGLETDOMAIN
 fi
 echo "All done!!"
 echo "Starting Jenkins ..."
@@ -119,4 +122,5 @@ checkJenkinsIsUp
 if [[ -e /var/log/jenkins/jenkins.log ]]; then
   tail -f /var/log/jenkins/jenkins.log
 fi
+
 watch -n 86400 $PLAYBOOK_FOLDER/run_ansible_playbook.sh

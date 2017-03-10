@@ -84,7 +84,6 @@ RUN echo "$JENKINS_VERSION" > /usr/share/jenkins/ref/jenkins.install.InstallUtil
 WORKDIR /usr/local/share/ansible/playbook
 
 CMD ["/bin/bash", "-c", "run_ansible_playbook.sh"]
-
 EXPOSE  8080
 EXPOSE 50000
 
