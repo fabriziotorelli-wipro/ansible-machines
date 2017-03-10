@@ -49,9 +49,9 @@ COPY ./keys/* /root/.ssh/
 COPY ./keys/* /home/jenkins/.ssh/
 RUN chmod 600 -f /home/jenkins/.ssh/id_rsa*
 RUN chmod 600 -f /root/.ssh/id_rsa*
-RUN mkdir -p /home/jenkins/.ssh
 
 RUN chown -Rf jenkins:jenkins /home/jenkins
+RUN chown -Rf jenkins:jenkins /usr/local/share/ansible/playbook
 
 RUN apt-get -y autoremove && \
     apt-get -y clean && \
@@ -80,7 +80,6 @@ USER jenkins
 # "For 2.x-derived images, you may also want to" - we're 2.0 dervied, so we want this
 RUN echo "$JENKINS_VERSION" > /usr/share/jenkins/ref/jenkins.install.UpgradeWizard.state
 RUN echo "$JENKINS_VERSION" > /usr/share/jenkins/ref/jenkins.install.InstallUtil.lastExecVersion
-USER root
 
 WORKDIR /usr/local/share/ansible/playbook
 

@@ -1,116 +1,122 @@
 #!/bin/bash
+PLAYBOOK_FOLDER="/usr/local/share/ansible/playbook"
+
+function checkJenkinsIsUp {
+  COUNTER=0
+  echo "Waiting for Jenkins to be up and running ..."
+  JENKINS_UP="$(curl -I  --stderr /dev/null http://localhost:8080/cli/ | head -1 | cut -d' ' -f2)"
+  while [[ "200" != "$JENKINS_UP" && $COUNTER -lt 20 ]]
+  do
+    sleep 5
+    echo "Waiting for Jenkins to be up and running ..."
+    JENKINS_UP="$(curl -I  --stderr /dev/null http://localhost:8080/cli/ | head -1 | cut -d' ' -f2)"
+    let COUNTER=COUNTER+1
+  done
+}
 
 PREPARED="$(ls /usr/local/share/ansible/playbook/.prepared)"
 
 if [[ -z "$PREPARED" ]]; then
   echo "Removing private key ..."
-  rm -f /root/.ssh/id_rsa
+  rm -f /home/jenkins/.ssh/id_rsa
   echo "Removing public key ..."
-  rm -f /root/.ssh/id_rsa.pub
+  rm -f /home/jenkins/.ssh/id_rsa.pub
   export CURRPWD="$PWD"
   if ! [[ -z "$PRIVATE_PUBLIC_KEY_TAR_URL" ]]; then
     echo "Importing private/public key ..."
-    wget "$PRIVATE_PUBLIC_KEY_TAR_URL" -O /root/keys.tar
-    if [[ -e /root/keys.tar ]]; then
+    wget "$PRIVATE_PUBLIC_KEY_TAR_URL" -O /home/jenkins/keys.tar
+    if [[ -e /home/jenkins/keys.tar ]]; then
       echo "decompressing in .ssh path ..."
-      cd /root/.ssh
+      cd /home/jenkins/.ssh
       tar -xvf ../keys.tar
-      rm -f /root/keys.tar
+      rm -f /home/jenkins/keys.tar
+      sudo cp /home/jenkins/.ssh/* /root/.ssh/
       cd $CURRPWD
     fi
   else
     echo "Removing private key ..."
-    rm -f /root/.ssh/id_rsa
+    rm -f /home/jenkins/.ssh/id_rsa
     echo "Removing public key ..."
-    rm -f /root/.ssh/id_rsa.pub
+    rm -f /home/jenkins/.ssh/id_rsa.pub
   fi
   echo "prepare command for jenkins stop ..."
-  echo "#!/bin/sh" > /usr/local/bin/stop-jenkins.sh
-  echo "ps -eaf | grep jenkins.sh | awk 'BEGIN {FS=OFS=" "}{print $2}'|xargs kill" >> /usr/local/bin/stop-jenkins.sh
-  chmod 777 /usr/local/bin/stop-jenkins.sh
+  echo "#!/bin/sh" > /home/jenkins/stop-jenkins.sh
+  echo "ps -eaf | grep jenkins.sh | awk 'BEGIN {FS=OFS=" "}{print $2}'|xargs kill" >> /home/jenkins/stop-jenkins.sh
+  sudo mv /home/jenkins/stop-jenkins.sh /usr/local/bin/stop-jenkins.sh
+  sudo chmod 777 /usr/local/bin/stop-jenkins.sh
   if ! [[ -z "$PLUGINS_TEXT_FILE_URL" ]]; then
     echo "Importing plugins text file ..."
     wget "$PLUGINS_TEXT_FILE_URL" -O /usr/share/jenkins/ref/plugins.txt
     if [[ -e /usr/share/jenkins/ref/plugins.txt ]]; then
       echo "Install plugins from text file ..."
+      echo "Starting Jenkins"
       jenkins.sh &
-      echo "Waiting for Jenkins to be up and running ..."
-      JENKINS_UP="$(curl -I  --stderr /dev/null http://localhost:8080/cli/ | head -1 | cut -d' ' -f2)"
-      while ("200" != "$JENKINS_UP")
-      do
-        sleep 5
-        echo "Waiting for Jenkins to be up and running ..."
-        JENKINS_UP="$(curl -I  --stderr /dev/null http://localhost:8080/cli/ | head -1 | cut -d' ' -f2)"
-
-      done
+      checkJenkinsIsUp
       echo "Running plugin procedure ..."
       cat /usr/share/jenkins/ref/plugins.txt | xargs /usr/local/bin/plugins.sh
-      echo "Stopping jenkins"
+      echo "Stopping Jenkins"
       /usr/local/bin/stop-jenkins.sh
     fi
   fi
-#  ansible-playbook -c local -i ./inventory/localhost  playbook.yml
   echo "Configuring ansible host to : $ANSIBLE_HOSTNAME"
   echo "Configuring machine host to : $HOSTNAME"
   echo "Configuring machine riglet domain to : $RIGLETDOMAIN"
-  echo "127.0.0.1  $HOSTNAME   $HOSTNAME.$RIGLETDOMAIN" > /etc/hosts
-  hostname $HOSTNAME
-  cp ./inventory/localhost ./inventory/$ANSIBLE_HOSTNAME
-  echo "$ANSIBLE_HOSTNAME      ansible_connection=local" >> ./inventory/$ANSIBLE_HOSTNAME
-  git config --global --add user.name $USER_NAME
-  git config --global --add user.email $USER_EMAIL
-  git clone $MAIN_REPO_URL main
-  cd main
-  git checkout $MAIN_REPO_BRANCH
-  git fetch
-  git pull
-  rm -Rf .git
-  cd ../
-  cp -f ./template/ansible.cfg ./main/$MAIN_REPO_FOLDER/
-  git clone $ROLES_REPO_URL roles
-  cd roles
-  git checkout $ROLES_REPO_BRANCH
-  git fetch
-  git pull
-  rm -Rf .git
-  cd ..
-  chown -Rf jenkins:jenkins /usr/share/jenkins
-  chown -Rf jenkins:jenkins usr/local/share/ansible/playbook
-  # cp ./template/playbook.yml ./
-  # for i in ${PLAYBOOKS//,/ }
-  #   do
-  #       echo "  - $i.yml" >> ./playbook.yml
-  #   done
+  sudo cp /etc/hosts /home/jenkins/
+  sudo chown jenkins:jenkins hosts
+  echo "127.0.0.1  localhost localhost.localdomain localhost.$RIGLETDOMAIN" >> /home/jenkins/hosts
+  echo "127.0.0.1  $HOSTNAME   $HOSTNAME.$RIGLETDOMAIN" >> /home/jenkins/hosts
+  sudo chown root:root /home/jenkins/hosts
+  sudo mv /home/jenkins/hosts /etc/hosts
+  sudo hostname $HOSTNAME
+  cp $PLAYBOOK_FOLDER/inventory/localhost $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
+  echo "$ANSIBLE_HOSTNAME      ansible_connection=local" >> $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
+  sudo git config --global --add user.name $USER_NAME
+  sudo git config --global --add user.email $USER_EMAIL
+  sudo git clone $MAIN_REPO_URL $PLAYBOOK_FOLDER/main
+  sudo cd $PLAYBOOK_FOLDER/main
+  sudo git checkout $MAIN_REPO_BRANCH
+  sudo git fetch
+  sudo git pull
+  sudo rm -Rf .git
+  cd $PLAYBOOK_FOLDER
+  sudo chown -Rf jenkins:jenkins $PLAYBOOK_FOLDER/main
+  cp -f $PLAYBOOK_FOLDER/template/ansible.cfg $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER/
+  sudo git clone $ROLES_REPO_URL $PLAYBOOK_FOLDER/roles
+  sudo cd $PLAYBOOK_FOLDER/roles
+  sudo git checkout $ROLES_REPO_BRANCH
+  sudo git fetch
+  sudo git pull
+  sudo rm -Rf .git
+  cd $PLAYBOOK_FOLDER
+  sudo chown -Rf jenkins:jenkins $PLAYBOOK_FOLDER/roles
   #Fake prepare of variables
-  cp ./template/vars ./
-  touch ./.prepared
+  cp $PLAYBOOK_FOLDER/template/vars $PLAYBOOK_FOLDER/
+  touch $PLAYBOOK_FOLDER/.prepared
 fi
-
-sudo su jenkins
 
 INSTALLED="$(ls /usr/local/share/ansible/playbook/.installed)"
 FAILED=""
 if [[ -z "$INSTALLED" ]]; then
-#  ansible-playbook -c local -i ./inventory/localhost  playbook.yml
   echo "Installation of roles in progress ..."
-  cd ./main/$MAIN_REPO_FOLDER
+  cd $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER
   for i in ${PLAYBOOKS//,/ }
     do
-        if [[ -e ./$i.yml ]]; then
-          ansible-playbook -i /usr/local/share/ansible/playbook/inventory/$ANSIBLE_HOSTNAME -e @vars -e @inputs -e @private -e @/usr/local/share/ansible/playbook/vars ./$i.yml
+        if [[ -e $PLAYBOOK_FOLDER/$i.yml ]]; then
+          ansible-playbook -i /usr/local/share/ansible/playbook/inventory/$ANSIBLE_HOSTNAME -e @vars -e @inputs -e @private -e @/usr/local/share/ansible/playbook/vars $PLAYBOOK_FOLDER/$i.yml
         else
           FAILED="1"
           echo "Required role $i.yml doesn't exist ..."
         fi
-        echo "  - $i.yml" >> ./playbook.yml
     done
   if [[ -z "$FAILED" ]]; then
-    touch ./.installed
+    touch $PLAYBOOK_FOLDER/.installed
   fi
 fi
-sudo chown -Rf jenkins:jenkins /usr/share/jenkins
-sudo chown -Rf jenkins:jenkins usr/local/share/ansible/playbook
 echo "All done!!"
+echo "Starting Jenkins ..."
 jenkins.sh &
-sleep 20
-tail -f /var/log/jenkins/jenkins.log
+checkJenkinsIsUp
+if [[ -e /var/log/jenkins/jenkins.log ]]; then
+  tail -f /var/log/jenkins/jenkins.log
+fi
+watch -n 86400 $PLAYBOOK_FOLDER/run_ansible_playbook.sh
