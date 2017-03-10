@@ -28,7 +28,7 @@ if [[ -z "$PREPARED" ]]; then
   echo "#!/bin/sh" > /usr/local/bin/stop-jenkins.sh
   echo "ps -eaf | grep jenkins.sh | awk 'BEGIN {FS=OFS=" "}{print $2}'|xargs kill" >> /usr/local/bin/stop-jenkins.sh
   chmod 777 /usr/local/bin/stop-jenkins.sh
-  if ! [[ -z "$PLUGIN_TEXT_FILE_URL" ]]; then
+  if ! [[ -z "$PLUGINS_TEXT_FILE_URL" ]]; then
     echo "Importing plugins text file ..."
     wget "$PLUGINS_TEXT_FILE_URL" -O /usr/share/jenkins/ref/plugins.txt
     if [[ -e /usr/share/jenkins/ref/plugins.txt ]]; then
