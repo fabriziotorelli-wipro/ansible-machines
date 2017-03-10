@@ -24,12 +24,29 @@ if [[ -z "$PREPARED" ]]; then
     echo "Removing public key ..."
     rm -f /root/.ssh/id_rsa.pub
   fi
+  echo "prepare command for jenkins stop ..."
+  echo "#!/bin/sh" > /usr/local/bin/stop-jenkins.sh
+  echo "ps -eaf | grep jenkins.sh | awk 'BEGIN {FS=OFS=" "}{print $2}'|xargs kill" >> /usr/local/bin/stop-jenkins.sh
+  chmod 777 /usr/local/bin/stop-jenkins.sh
   if ! [[ -z "$PLUGIN_TEXT_FILE_URL" ]]; then
     echo "Importing plugins text file ..."
     wget "$PLUGINS_TEXT_FILE_URL" -O /usr/share/jenkins/ref/plugins.txt
     if [[ -e /usr/share/jenkins/ref/plugins.txt ]]; then
       echo "Install plugins from text file ..."
+      jenkins.sh &
+      echo "Waiting for Jenkins to be up and running ..."
+      JENKINS_UP="$(curl -I  --stderr /dev/null http://localhost:8080/login | head -1 | cut -d' ' -f2)"
+      while ("200" != "$JENKINS_UP")
+      do
+        sleep 5
+        echo "Waiting for Jenkins to be up and running ..."
+        JENKINS_UP="$(curl -I  --stderr /dev/null http://localhost:8080/login | head -1 | cut -d' ' -f2)"
+
+      done
+      echo "Running plugin procedure ..."
       /usr/local/bin/plugins.sh /usr/share/jenkins/ref/plugins.txt
+      echo "Stopping jenkins"
+      /usr/local/bin/stop-jenkins.sh
     fi
   fi
 #  ansible-playbook -c local -i ./inventory/localhost  playbook.yml
