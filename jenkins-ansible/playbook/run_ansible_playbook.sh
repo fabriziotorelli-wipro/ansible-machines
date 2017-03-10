@@ -61,4 +61,5 @@ fi
 echo "All done!!"
 sudo su jenkins
 jenkins.sh &
-watch -n 86400 /usr/local/share/ansible/playbook/run_ansible_playbook.sh
+sleep 20
+tail -f /var/log/jenkins/jenkins.log

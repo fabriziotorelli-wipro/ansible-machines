@@ -1,4 +1,4 @@
-FROM jenkins
+FROM jenkins:2.32.3
 
 MAINTAINER Fabrizio Torelli (fabrizio.torelli@wipro.com)
 
@@ -15,7 +15,9 @@ ENV MAIN_REPO_URL='git@bitbucket.org:digitalrigbitbucketteam/digitalrig-riglet.g
     ANSIBLE_HOSTNAME=jenkins \
     HOSTNAME=jenkins \
     RIGLETDOMAIN=riglet \
-    PATH=/usr/local/share/ansible/playbook:$PATH
+    PATH=/usr/local/share/ansible/playbook:$PATH \
+    JAVA_OPTS="-Xmx4096m" \
+    JENKINS_OPTS="--logfile=/var/log/jenkins/jenkins.log --webroot=/var/cache/jenkins/war"
 
 
 WORKDIR /usr/local/share/ansible
@@ -57,6 +59,23 @@ RUN apt-get -y autoremove && \
      echo "jenkins  ALL=(ALL) NOPASSWD:ALL" >> /root/sudoers && \
      chmod 400 /root/sudoers && mv /root/sudoers /etc/sudoers
 
+RUN mkdir /var/log/jenkins
+RUN mkdir /var/cache/jenkins
+RUN chown -R  jenkins:jenkins /var/log/jenkins
+RUN chown -R  jenkins:jenkins /var/cache/jenkins
+
+USER jenkins
+
+# install plugins; the plugins.txt file can be exported from Jenkins like this:
+# JENKINS_HOST=username:password@myhost.com:port
+# curl -sSL "http://$JENKINS_HOST/pluginManager/api/xml?depth=1&xpath=/*/*/shortName|/*/*/version&wrapper=plugins" | perl -pe 's/.*?<shortName>([\w-]+).*?<version>([^<]+)()(<\/\w+>)+/\1 \2\n/g'|sed 's/ /:/' > jenkins-master/conf/plugins.txt
+
+#Plugins are defined in the ansible
+#COPY conf/plugins.txt /var/jenkins_home/plugins.txt
+#RUN /usr/local/bin/plugins.sh /var/jenkins_home/plugins.txt
+
+# "For 2.x-derived images, you may also want to" - we're 2.0 dervied, so we want this
+RUN echo 2.0 > /usr/share/jenkins/ref/jenkins.install.UpgradeWizard.state
 
 USER root
 
