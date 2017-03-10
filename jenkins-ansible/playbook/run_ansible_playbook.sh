@@ -24,6 +24,13 @@ if [[ -z "$PREPARED" ]]; then
     echo "Removing public key ..."
     rm -f /root/.ssh/id_rsa.pub
   fi
+  if ! [[ -z "$PLUGIN_TEXT_FILE_URL" ]]; then
+    echo "Importing plugins text file ..."
+    wget "$PLUGINS_TEXT_FILE_URL" -O /usr/share/jenkins/ref/plugins.txt
+    if [[ -e /usr/share/jenkins/ref/plugins.txt ]]; then
+      /usr/local/bin/plugins.sh /usr/share/jenkins/ref/plugins.txt
+    fi
+  fi
 #  ansible-playbook -c local -i ./inventory/localhost  playbook.yml
   echo "Configuring ansible host to : $ANSIBLE_HOSTNAME"
   echo "Configuring machine host to : $HOSTNAME"
