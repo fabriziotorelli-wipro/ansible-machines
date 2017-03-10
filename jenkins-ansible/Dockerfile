@@ -19,7 +19,8 @@ ENV MAIN_REPO_URL='git@bitbucket.org:digitalrigbitbucketteam/digitalrig-riglet.g
     PLUGINS_TEXT_FILE_URL="" \
     PATH=/usr/local/share/ansible/playbook:$PATH \
     JAVA_OPTS="-Xmx4096m" \
-    JENKINS_OPTS="--logfile=/var/log/jenkins/jenkins.log --webroot=/var/cache/jenkins/war"
+    JENKINS_OPTS="--logfile=/var/log/jenkins/jenkins.log --webroot=/var/cache/jenkins/war" \
+    JENKINS_VERSION='2.32.3'
 
 
 WORKDIR /usr/local/share/ansible
@@ -77,8 +78,8 @@ USER jenkins
 #RUN /usr/local/bin/plugins.sh /var/jenkins_home/plugins.txt
 
 # "For 2.x-derived images, you may also want to" - we're 2.0 dervied, so we want this
-RUN echo 2.0 > /usr/share/jenkins/ref/jenkins.install.UpgradeWizard.state
-
+RUN echo "$JENKINS_VERSION" > /usr/share/jenkins/ref/jenkins.install.UpgradeWizard.state
+RUN echo "$JENKINS_VERSION" > /usr/share/jenkins/ref/jenkins.install.InstallUtil.lastExecVersion
 USER root
 
 WORKDIR /usr/local/share/ansible/playbook

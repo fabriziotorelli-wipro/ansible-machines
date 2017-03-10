@@ -35,16 +35,16 @@ if [[ -z "$PREPARED" ]]; then
       echo "Install plugins from text file ..."
       jenkins.sh &
       echo "Waiting for Jenkins to be up and running ..."
-      JENKINS_UP="$(curl -I  --stderr /dev/null http://localhost:8080/login | head -1 | cut -d' ' -f2)"
+      JENKINS_UP="$(curl -I  --stderr /dev/null http://localhost:8080/cli/ | head -1 | cut -d' ' -f2)"
       while ("200" != "$JENKINS_UP")
       do
         sleep 5
         echo "Waiting for Jenkins to be up and running ..."
-        JENKINS_UP="$(curl -I  --stderr /dev/null http://localhost:8080/login | head -1 | cut -d' ' -f2)"
+        JENKINS_UP="$(curl -I  --stderr /dev/null http://localhost:8080/cli/ | head -1 | cut -d' ' -f2)"
 
       done
       echo "Running plugin procedure ..."
-      /usr/local/bin/plugins.sh /usr/share/jenkins/ref/plugins.txt
+      cat /usr/share/jenkins/ref/plugins.txt | xargs /usr/local/bin/plugins.sh
       echo "Stopping jenkins"
       /usr/local/bin/stop-jenkins.sh
     fi
