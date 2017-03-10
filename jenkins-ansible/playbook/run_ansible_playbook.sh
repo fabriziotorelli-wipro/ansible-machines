@@ -1,5 +1,4 @@
 #!/bin/bash
-/usr/sbin/init
 
 PREPARED="$(ls /usr/local/share/ansible/playbook/.prepared)"
 if [[ -z "$PREPARED" ]]; then
@@ -61,4 +60,5 @@ if [[ -z "$INSTALLED" ]]; then
 fi
 echo "All done!!"
 sudo su jenkins
-jenkins.sh
+jenkins.sh &
+watch -n 86400 /usr/local/share/ansible/playbook/run_ansible_playbook.sh
