@@ -3,7 +3,7 @@ FROM jenkins:2.32.3
 MAINTAINER Fabrizio Torelli (fabrizio.torelli@wipro.com)
 
 ENV MAIN_REPO_URL='git@bitbucket.org:digitalrigbitbucketteam/digitalrig-riglet.git' \
-    MAIN_REPO_BRANCH=microservices-poc \
+    MAIN_REPO_BRANCH=microservices-poc-rancher \
     MAIN_REPO_FOLDER=ec2 \
     ROLES_REPO_URL='git@bitbucket.org:digitalrigbitbucketteam/dr-scripts.git' \
     ROLES_REPO_BRANCH=microservices-poc-rancher \
@@ -31,7 +31,7 @@ RUN apt-get update
 
 RUN apt-get -y install --no-install-recommends sssd realmd adcli samba-common ntpdate ntp sudo \
             libffi-dev libssl-dev libxml2-dev libxslt1-dev make asciidoc openssl tar groovy unzip \
-            python python-pip python-dev build-essential  vim zip && pip install --upgrade pip \
+            python python-pip python-dev build-essential cron vim zip && pip install --upgrade pip \
              &&  pip install ansible httplib2 docker-py
 RUN apt-get -y upgrade
 
@@ -84,7 +84,6 @@ RUN echo "$JENKINS_VERSION" > /usr/share/jenkins/ref/jenkins.install.InstallUtil
 WORKDIR /usr/local/share/ansible/playbook
 
 CMD ["/bin/bash", "-c", "run_ansible_playbook.sh"]
-EXPOSE  8080
-EXPOSE 50000
+EXPOSE 8080 50000
 
 #ENTRYPOINT ["/bin/bash"]

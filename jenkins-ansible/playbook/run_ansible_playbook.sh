@@ -1,6 +1,9 @@
 #!/bin/bash
 PLAYBOOK_FOLDER="/usr/local/share/ansible/playbook"
 
+#Ensure the process to be up ...
+/bin/bash &
+
 function checkJenkinsIsUp {
   COUNTER=0
   echo "Waiting for Jenkins to be up and running ..."
@@ -40,8 +43,12 @@ if [[ -z "$PREPARED" ]]; then
     rm -f /home/jenkins/.ssh/id_rsa.pub
   fi
   echo "prepare command for jenkins stop ..."
-  echo "#!/bin/sh" > /home/jenkins/stop-jenkins.sh
-  echo "ps -eaf | grep 'jenkins.sh' | grep -v grep | awk 'BEGIN {FS=OFS=\" \"}{print \$2}'|xargs kill" >> /home/jenkins/stop-jenkins.sh
+  echo "#!/bin/bash" > /home/jenkins/stop-jenkins.sh
+#  echo "ps -eaf | grep 'jenkins.sh' | grep -v grep | awk 'BEGIN {FS=OFS=\" \"}{print \$2}'|xargs kill" >> /home/jenkins/stop-jenkins.sh
+  echo "if [[ -e /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar ]]; then"
+  echo "  java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080/ shutdown 2> /dev/null"
+  echo "fi"
+  echo "exit 0"
   sudo mv /home/jenkins/stop-jenkins.sh /usr/local/bin/stop-jenkins.sh
   sudo chmod 777 /usr/local/bin/stop-jenkins.sh
   if ! [[ -z "$PLUGINS_TEXT_FILE_URL" ]]; then
@@ -68,7 +75,7 @@ if [[ -z "$PREPARED" ]]; then
   sudo su -c "cat /home/jenkins/hosts > /etc/hosts"
   rm -f  /home/jenkins/hosts
   echo "New hosts file :"
-  sudo echo /etc/hosts
+  sudo cat /etc/hosts
   cp $PLAYBOOK_FOLDER/inventory/localhost $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
   echo "$ANSIBLE_HOSTNAME      ansible_connection=local" >> $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
   sudo git config --global --add user.name $USER_NAME
@@ -96,9 +103,11 @@ FAILED=""
 if [[ -z "$INSTALLED" ]]; then
   echo "Installation of roles in progress ..."
   cd $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER
+  echo "Playbooks Installation forlder: $PWD"
   for i in ${PLAYBOOKS//,/ }
     do
         if [[ -e $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER/$i.yml ]]; then
+          echo "INSTALLING PLAYBOOK : $i.yml"
           ansible-playbook -i $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME -e @vars -e @inputs -e @private -e @$PLAYBOOK_FOLDER/vars ./$i.yml
         else
           FAILED="1"
@@ -124,3 +133,4 @@ if [[ -e /var/log/jenkins/jenkins.log ]]; then
 fi
 
 watch -n 86400 $PLAYBOOK_FOLDER/run_ansible_playbook.sh
+echo "Exit for Jenkins Container ..."
