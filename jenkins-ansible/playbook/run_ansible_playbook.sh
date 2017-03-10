@@ -28,6 +28,7 @@ if [[ -z "$PREPARED" ]]; then
     echo "Importing plugins text file ..."
     wget "$PLUGINS_TEXT_FILE_URL" -O /usr/share/jenkins/ref/plugins.txt
     if [[ -e /usr/share/jenkins/ref/plugins.txt ]]; then
+      echo "Install plugins from text file ..."
       /usr/local/bin/plugins.sh /usr/share/jenkins/ref/plugins.txt
     fi
   fi
