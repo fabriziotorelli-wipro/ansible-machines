@@ -18,7 +18,7 @@ ENV MAIN_REPO_URL='git@bitbucket.org:digitalrigbitbucketteam/digitalrig-riglet.g
     PRIVATE_PUBLIC_KEY_TAR_URL="" \
     PLUGINS_TEXT_FILE_URL="" \
     PATH=/usr/local/share/ansible/playbook:$PATH \
-    JAVA_OPTS="-Xmx4096m" \
+    JAVA_OPTS="-Xmx4096m -Djenkins.install.runSetupWizard=false" \
     JENKINS_OPTS="--logfile=/var/log/jenkins/jenkins.log --webroot=/var/cache/jenkins/war" \
     JENKINS_VERSION='2.32.3'
 

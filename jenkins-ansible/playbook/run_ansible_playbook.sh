@@ -74,6 +74,8 @@ if [[ -z "$PREPARED" ]]; then
   git pull
   rm -Rf .git
   cd ..
+  chown -Rf jenkins:jenkins /usr/share/jenkins
+  chown -Rf jenkins:jenkins usr/local/share/ansible/playbook
   # cp ./template/playbook.yml ./
   # for i in ${PLAYBOOKS//,/ }
   #   do
@@ -83,6 +85,8 @@ if [[ -z "$PREPARED" ]]; then
   cp ./template/vars ./
   touch ./.prepared
 fi
+
+sudo su jenkins
 
 INSTALLED="$(ls /usr/local/share/ansible/playbook/.installed)"
 FAILED=""
@@ -104,8 +108,9 @@ if [[ -z "$INSTALLED" ]]; then
     touch ./.installed
   fi
 fi
+sudo chown -Rf jenkins:jenkins /usr/share/jenkins
+sudo chown -Rf jenkins:jenkins usr/local/share/ansible/playbook
 echo "All done!!"
-sudo su jenkins
 jenkins.sh &
 sleep 20
 tail -f /var/log/jenkins/jenkins.log
