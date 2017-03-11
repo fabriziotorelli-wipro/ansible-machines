@@ -18,6 +18,7 @@ ENV MAIN_REPO_URL="" \
     PRIVATE_PUBLIC_KEY_TAR_URL="" \
     PLUGINS_TEXT_FILE_URL="" \
     PRESTART_JENKINS="true" \
+    PRESTART_JENKINS_IF_UP_POST_ANSIBLE="false" \
     RESTART_JENKINS_AFTER_ANSIBLE="false" \
     PATH=/usr/local/share/ansible/playbook:$PATH \
     JAVA_OPTS="-Xmx4096m -Djenkins.install.runSetupWizard=false" \

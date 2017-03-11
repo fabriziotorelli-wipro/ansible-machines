@@ -198,9 +198,13 @@ if [[ "true" != "$PRESTART_JENKINS" ]]; then
     checkJenkinsIsUp
   else
     if [[ "true" != "$RESTART_JENKINS_AFTER_ANSIBLE" ]]; then
-        echo "Post-Ansible: Server up!! Restarting Jenkins instead of Start-Up ..."
-        /usr/local/bin/execute-cli-command.sh safe-restart
-        checkJenkinsIsUp
+        if [[ "true" == "$PRESTART_JENKINS_IF_UP_POST_ANSIBLE" ]]; then
+          echo "Post-Ansible: Server up!! Restarting Jenkins instead of Start-Up ..."
+          /usr/local/bin/execute-cli-command.sh safe-restart
+          checkJenkinsIsUp
+        else
+          echo "Post-Ansible: No start to apply, PRESTART_JENKINS_IF_UP_POST_ANSIBLE=$PRESTART_JENKINS_IF_UP_POST_ANSIBLE"
+        fi
     else
       echo "Post-Ansible: No start to apply, waiting for Jenkins Restart ..."
     fi
