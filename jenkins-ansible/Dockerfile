@@ -63,6 +63,7 @@ RUN chown -R  jenkins:jenkins /var/log/jenkins
 RUN chown -R  jenkins:jenkins /var/cache/jenkins
 RUN chown -R  jenkins:jenkins /usr/share/jenkins
 RUN usermod -aG ssh jenkins
+RUN update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
 
 USER jenkins
 
