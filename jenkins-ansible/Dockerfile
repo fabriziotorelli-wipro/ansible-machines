@@ -43,14 +43,9 @@ RUN chmod 777 /usr/local/share/ansible/playbook/run_ansible_playbook.sh
 
 RUN mkdir -p /root/.ssh
 
-RUN mkdir -p /home/jenkins/.ssh
+RUN mkdir -p /var/jenkins_home/.ssh
 
-COPY ./keys/* /root/.ssh/
-COPY ./keys/* /home/jenkins/.ssh/
-RUN chmod 600 -f /home/jenkins/.ssh/id_rsa*
-RUN chmod 600 -f /root/.ssh/id_rsa*
-
-RUN chown -Rf jenkins:jenkins /home/jenkins
+RUN chown -Rf jenkins:jenkins /var/jenkins_home
 RUN chown -Rf jenkins:jenkins /usr/local/share/ansible/playbook
 
 RUN apt-get -y autoremove && \

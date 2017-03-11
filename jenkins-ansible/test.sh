@@ -19,7 +19,7 @@ USER_CREDENTIALS=""
 ANSIBLE_HOSTNAME="jenkins"
 HOSTNAME="jenkins"
 RIGLETDOMAIN="riglet"
-PRIVATE_PUBLIC_KEY_TAR_URL="https://github.com/fabriziotorelli-wipro/ansible-machines/raw/master/jenkins-ansible/keys.tar"
+PRIVATE_PUBLIC_KEY_TAR_URL="https://github.com/hellgate75/online-keys/raw/master/20170311/jenkins/keys.tar"
 PLUGINS_TEXT_FILE_URL=""
 docker run -d  -p 8080:8080 -p 50000:50000 --privileged -e "MAIN_REPO_URL=$MAIN_REPO_URL" -e "PLAYBOOKS=$PLAYBOOKS" \
           -e "MAIN_REPO_BRANCH=$MAIN_REPO_BRANCH" -e "MAIN_REPO_FOLDER=$MAIN_REPO_FOLDER" -e "ROLES_REPO_URL=$ROLES_REPO_URL" \
