@@ -2,19 +2,19 @@ FROM jenkins:2.32.3
 
 MAINTAINER Fabrizio Torelli (fabrizio.torelli@wipro.com)
 
-ENV MAIN_REPO_URL='git@bitbucket.org:digitalrigbitbucketteam/digitalrig-riglet.git' \
-    MAIN_REPO_BRANCH=microservices-poc-rancher \
-    MAIN_REPO_FOLDER=ec2 \
-    ROLES_REPO_URL='git@bitbucket.org:digitalrigbitbucketteam/dr-scripts.git' \
-    ROLES_REPO_BRANCH=microservices-poc-rancher \
-    ROLES_REPO_FOLDER=roles \
-    PLAYBOOKS=../jenkins,microservices \
-    USER_NAME=fabriziotorelli \
-    USER_EMAIL=fabrizio.torelli@wipro.com \
-    USER_CREDENTIALS= \
-    ANSIBLE_HOSTNAME=jenkins \
-    HOSTNAME=jenkins \
-    RIGLETDOMAIN=riglet \
+ENV MAIN_REPO_URL="" \
+    MAIN_REPO_BRANCH="" \
+    MAIN_REPO_FOLDER="" \
+    ROLES_REPO_URL="" \
+    ROLES_REPO_BRANCH="" \
+    ROLES_REPO_FOLDER="" \
+    PLAYBOOKS="" \
+    USER_NAME="" \
+    USER_EMAIL="" \
+    USER_CREDENTIALS="" \
+    ANSIBLE_HOSTNAME="" \
+    HOSTNAME="" \
+    RIGLETDOMAIN="" \
     PRIVATE_PUBLIC_KEY_TAR_URL="" \
     PLUGINS_TEXT_FILE_URL="" \
     PATH=/usr/local/share/ansible/playbook:$PATH \
@@ -66,6 +66,7 @@ RUN mkdir /var/log/jenkins
 RUN mkdir /var/cache/jenkins
 RUN chown -R  jenkins:jenkins /var/log/jenkins
 RUN chown -R  jenkins:jenkins /var/cache/jenkins
+RUN chown -R  jenkins:jenkins /usr/share/jenkins
 
 USER jenkins
 

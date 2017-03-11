@@ -43,14 +43,62 @@ if [[ -z "$PREPARED" ]]; then
     rm -f /home/jenkins/.ssh/id_rsa.pub
   fi
   echo "prepare command for jenkins stop ..."
+
   echo "#!/bin/bash" > /home/jenkins/stop-jenkins.sh
-#  echo "ps -eaf | grep 'jenkins.sh' | grep -v grep | awk 'BEGIN {FS=OFS=\" \"}{print \$2}'|xargs kill" >> /home/jenkins/stop-jenkins.sh
-  echo "if [[ -e /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar ]]; then"
-  echo "  java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080/ shutdown 2> /dev/null"
-  echo "fi"
-  echo "exit 0"
+  echo "if [[ -e /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar ]]; then" >> /home/jenkins/stop-jenkins.sh
+  echo "  java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080/ safe-shutdown 2> /dev/null" >> /home/jenkins/stop-jenkins.sh
+  echo "else" >> /home/jenkins/stop-jenkins.sh
+  echo "  echo 'Client jar not found ...'" >> /home/jenkins/stop-jenkins.sh
+  echo "  exit 1" >> /home/jenkins/stop-jenkins.sh
+  echo "fi" >> /home/jenkins/stop-jenkins.sh
+  echo "exit 0" >> /home/jenkins/stop-jenkins.sh
   sudo mv /home/jenkins/stop-jenkins.sh /usr/local/bin/stop-jenkins.sh
+
+  echo "#!/bin/bash" > /home/jenkins/restart-jenkins.sh
+  echo "if [[ -e /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar ]]; then" >> /home/jenkins/restart-jenkins.sh
+  echo "  java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080/ safe-restart 2> /dev/null" >> /home/jenkins/restart-jenkins.sh
+  echo "else" >> /home/jenkins/restart-jenkins.sh
+  echo "  echo 'Client jar not found ...'" >> /home/jenkins/restart-jenkins.sh
+  echo "  exit 1" >> /home/jenkins/restart-jenkins.sh
+  echo "fi" >> /home/jenkins/restart-jenkins.sh
+  echo "exit 0" >> /home/jenkins/restart-jenkins.sh
+  sudo mv /home/jenkins/restart-jenkins.sh /usr/local/bin/restart-jenkins.sh
+
+  echo "#!/bin/bash" > /home/jenkins/execute-cli-file-command.sh
+  echo "if [[ -e /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar ]]; then" >> /home/jenkins/execute-cli-file-command.sh
+  echo "  java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080/ \${@:2} < \$1" >> /home/jenkins/execute-cli-file-command.sh
+  echo "else" >> /home/jenkins/execute-cli-file-command.sh
+  echo "  echo 'Client jar not found ...'" >> /home/jenkins/execute-cli-file-command.sh
+  echo "  exit 1" >> /home/jenkins/execute-cli-file-command.sh
+  echo "fi" >> /home/jenkins/execute-cli-file-command.sh
+  echo "exit 0" >> /home/jenkins/execute-cli-file-command.sh
+  sudo mv /home/jenkins/execute-cli-file-command.sh /usr/local/bin/execute-cli-file-command.sh
+
+  echo "#!/bin/bash" > /home/jenkins/execute-cli-command.sh
+  echo "if [[ -e /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar ]]; then" >> /home/jenkins/execute-cli-command.sh
+  echo "  java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080/ \$@" >> /home/jenkins/execute-cli-command.sh
+  echo "else" >> /home/jenkins/execute-cli-command.sh
+  echo "  echo 'Client jar not found ...'" >> /home/jenkins/execute-cli-command.sh
+  echo "  exit 1" >> /home/jenkins/execute-cli-command.sh
+  echo "fi" >> /home/jenkins/execute-cli-command.sh
+  echo "exit 0" >> /home/execute-cli-command.sh
+  sudo mv /home/jenkins/execute-cli-command.sh /usr/local/bin/execute-cli-command.sh
+
   sudo chmod 777 /usr/local/bin/stop-jenkins.sh
+  sudo chmod 777 /usr/local/bin/restart-jenkins.sh
+  sudo chmod 777 /usr/local/bin/execute-cli-file-command.sh
+  sudo chmod 777 /usr/local/bin/execute-cli-command.sh
+  echo "+---------------------------------------------------------------+"
+  echo "| New Commands available :                                      |"
+  echo "| - Stop Jenkins without exit :                                 |"
+  echo "|   stop-jenkins.sh                                             |"
+  echo "| - Restart Jenkins without exit :                              |"
+  echo "|   restart-jenkins.sh                                          |"
+  echo "| - Execute Jenkins client command :                            |"
+  echo "|   execute-cli-command.sh <command> <parameter>...            |"
+  echo "| - Execute Jenkins client command with input file :            |"
+  echo "|   execute-cli-command.sh <file-path> <command> <parameter>...|"
+  echo "+---------------------------------------------------------------+"
   if ! [[ -z "$PLUGINS_TEXT_FILE_URL" ]]; then
     echo "Importing plugins text file ..."
     wget "$PLUGINS_TEXT_FILE_URL" -O /usr/share/jenkins/ref/plugins.txt
@@ -83,7 +131,8 @@ if [[ -z "$PREPARED" ]]; then
   sudo su root -c "git clone $MAIN_REPO_URL $PLAYBOOK_FOLDER/main && cd $PLAYBOOK_FOLDER/main && git checkout $MAIN_REPO_BRANCH && git fetch && sudo git pull && rm -Rf .git"
   cd $PLAYBOOK_FOLDER
   sudo chown -Rf jenkins:jenkins $PLAYBOOK_FOLDER/main
-  cp -f $PLAYBOOK_FOLDER/template/ansible.cfg $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER/
+  PARSED_FOLDER="$(echo "$ROLES_REPO_FOLDER" | sed 's/\//\\\//g' )"
+  sed -e "s/ROLES_PATH/\/usr\/local\/share\/ansible\/playbook\/roles\/$PARSED_FOLDER/g" $PLAYBOOK_FOLDER/template/ansible.cfg > $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER/ansible.cfg
   # sudo git clone $ROLES_REPO_URL $PLAYBOOK_FOLDER/roles
   # sudo cd $PLAYBOOK_FOLDER/roles
   # sudo git checkout $ROLES_REPO_BRANCH
