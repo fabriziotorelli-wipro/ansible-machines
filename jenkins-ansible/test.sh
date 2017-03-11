@@ -31,5 +31,5 @@ docker run -d  -p 8080:8080 -p 50000:50000 --privileged -e "MAIN_REPO_URL=$MAIN_
           -e "PLUGINS_TEXT_FILE_URL=$PLUGINS_TEXT_FILE_URL" -e "PRESTART_JENKINS=$PRESTART_JENKINS" \
           -e "RESTART_JENKINS_AFTER_ANSIBLE=$RESTART_JENKINS_AFTER_ANSIBLE" -e "container=docker" \
           --cap-add SYS_ADMIN --security-opt seccomp:unconfined -v /sys/fs/cgroup:/sys/fs/cgroup \
-          -it --name jenkins-ansible buildit/jenkins-ansible:2.32.3
+          -it --name jenkins-ansible builditftorelli/jenkins-ansible:2.32.3
 docker logs -f jenkins-ansible
