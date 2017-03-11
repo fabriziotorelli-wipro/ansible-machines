@@ -51,41 +51,41 @@ if [[ -z "$PREPARED" ]]; then
   echo "#!/bin/bash" > /var/jenkins_home/stop-jenkins.sh
   echo "if [[ -e /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar ]]; then" >> /var/jenkins_home/stop-jenkins.sh
   echo "  java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080/ safe-shutdown 2> /dev/null" >> /var/jenkins_home/stop-jenkins.sh
+  echo "  exit \$?" >> /var/jenkins_home/stop-jenkins.sh
   echo "else" >> /var/jenkins_home/stop-jenkins.sh
   echo "  echo 'Client jar not found ...'" >> /var/jenkins_home/stop-jenkins.sh
   echo "  exit 1" >> /var/jenkins_home/stop-jenkins.sh
   echo "fi" >> /var/jenkins_home/stop-jenkins.sh
-  echo "exit 0" >> /var/jenkins_home/stop-jenkins.sh
   sudo mv /var/jenkins_home/stop-jenkins.sh /usr/local/bin/stop-jenkins.sh
 
   echo "#!/bin/bash" > /var/jenkins_home/restart-jenkins.sh
   echo "if [[ -e /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar ]]; then" >> /var/jenkins_home/restart-jenkins.sh
   echo "  java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080/ safe-restart 2> /dev/null" >> /var/jenkins_home/restart-jenkins.sh
+  echo "  exit \$?" >> /var/jenkins_home/stop-jenkins.sh
   echo "else" >> /var/jenkins_home/restart-jenkins.sh
   echo "  echo 'Client jar not found ...'" >> /var/jenkins_home/restart-jenkins.sh
   echo "  exit 1" >> /var/jenkins_home/restart-jenkins.sh
   echo "fi" >> /var/jenkins_home/restart-jenkins.sh
-  echo "exit 0" >> /var/jenkins_home/restart-jenkins.sh
   sudo mv /var/jenkins_home/restart-jenkins.sh /usr/local/bin/restart-jenkins.sh
 
   echo "#!/bin/bash" > /var/jenkins_home/execute-cli-file-command.sh
   echo "if [[ -e /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar ]]; then" >> /var/jenkins_home/execute-cli-file-command.sh
   echo "  java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080/ \${@:2} < \$1" >> /var/jenkins_home/execute-cli-file-command.sh
+  echo "  exit \$?" >> /var/jenkins_home/stop-jenkins.sh
   echo "else" >> /var/jenkins_home/execute-cli-file-command.sh
   echo "  echo 'Client jar not found ...'" >> /var/jenkins_home/execute-cli-file-command.sh
   echo "  exit 1" >> /var/jenkins_home/execute-cli-file-command.sh
   echo "fi" >> /var/jenkins_home/execute-cli-file-command.sh
-  echo "exit 0" >> /var/jenkins_home/execute-cli-file-command.sh
   sudo mv /var/jenkins_home/execute-cli-file-command.sh /usr/local/bin/execute-cli-file-command.sh
 
   echo "#!/bin/bash" > /var/jenkins_home/execute-cli-command.sh
   echo "if [[ -e /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar ]]; then" >> /var/jenkins_home/execute-cli-command.sh
   echo "  java -jar /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080/ \$@" >> /var/jenkins_home/execute-cli-command.sh
+  echo "  exit \$?" >> /var/jenkins_home/stop-jenkins.sh
   echo "else" >> /var/jenkins_home/execute-cli-command.sh
   echo "  echo 'Client jar not found ...'" >> /var/jenkins_home/execute-cli-command.sh
   echo "  exit 1" >> /var/jenkins_home/execute-cli-command.sh
   echo "fi" >> /var/jenkins_home/execute-cli-command.sh
-  echo "exit 0" >> /var/jenkins_home/execute-cli-command.sh
   sudo mv /var/jenkins_home/execute-cli-command.sh /usr/local/bin/execute-cli-command.sh
 
   sudo chmod 777 /usr/local/bin/stop-jenkins.sh
