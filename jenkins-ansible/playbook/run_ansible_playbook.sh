@@ -41,7 +41,7 @@ if [[ -z "$PREPARED" ]]; then
   else
     echo "No key tar file specified or invalid url ..."
   fi
-  echo "prepare command for jenkins stop ..."
+  echo "prepare command for jenkins java client interaction ..."
 
   echo "#!/bin/bash" > /var/jenkins_home/stop-jenkins.sh
   echo "if [[ -e /var/cache/jenkins/war/WEB-INF/jenkins-cli.jar ]]; then" >> /var/jenkins_home/stop-jenkins.sh
@@ -80,7 +80,7 @@ if [[ -z "$PREPARED" ]]; then
   echo "  echo 'Client jar not found ...'" >> /var/jenkins_home/execute-cli-command.sh
   echo "  exit 1" >> /var/jenkins_home/execute-cli-command.sh
   echo "fi" >> /var/jenkins_home/execute-cli-command.sh
-  echo "exit 0" >> /home/execute-cli-command.sh
+  echo "exit 0" >> /var/jenkins_home/execute-cli-command.sh
   sudo mv /var/jenkins_home/execute-cli-command.sh /usr/local/bin/execute-cli-command.sh
 
   sudo chmod 777 /usr/local/bin/stop-jenkins.sh
