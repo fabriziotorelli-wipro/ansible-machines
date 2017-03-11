@@ -6,7 +6,7 @@ PLAYBOOK_FOLDER="/usr/local/share/ansible/playbook"
 
 #Check pre-start Jenkins ...
 if [[ "true" == "$PRESTART_JENKINS" ]]; then
-  echo "Pre-Starting Jenkins ..."
+  echo "Pre-Ansible: Starting Jenkins ..."
   jenkins.sh &
   checkJenkinsIsUp
 fi
@@ -24,6 +24,12 @@ function checkJenkinsIsUp {
     JENKINS_UP="$(curl -I  --stderr /dev/null http://localhost:8080/cli/ | head -1 | cut -d' ' -f2)"
     let COUNTER=COUNTER+1
   done
+}
+
+#Check Jenkins come up and running ...
+function getJenkinsState {
+  JENKINS_UP="$(curl -I  --stderr /dev/null http://localhost:8080/cli/ | head -1 | cut -d' ' -f2)"
+  eval "$1=$JENKINS_UP"
 }
 
 PREPARED="$(ls /usr/local/share/ansible/playbook/.prepared)"
@@ -184,14 +190,26 @@ fi
 echo "All done!!"
 #Check post-start Jenkins ....
 if [[ "true" != "$PRESTART_JENKINS" ]]; then
-  echo "Post-Starting Jenkins ..."
-  jenkins.sh &
-  checkJenkinsIsUp
+  STATE=""
+  getJenkinsState STATE
+  if [[ "200" !=  "$STATE" ]]; then
+    echo "Post-Ansible: Starting Jenkins ..."
+    jenkins.sh &
+    checkJenkinsIsUp
+  else
+    if [[ "true" != "$RESTART_JENKINS_AFTER_ANSIBLE" ]]; then
+        echo "Post-Ansible: Server up!! Restarting Jenkins instead of Start-Up ..."
+        /usr/local/bin/execute-cli-command.sh safe-restart
+        checkJenkinsIsUp
+    else
+      echo "Post-Ansible: No start to apply, waiting for Jenkins Restart ..."
+    fi
+  fi;
 fi
 
 #Check re-start Jenkins ....
 if [[ "true" == "$RESTART_JENKINS_AFTER_ANSIBLE" ]]; then
-  echo "Re-Starting Jenkins ..."
+  echo "Post-Ansible: Restarting Jenkins ..."
   /usr/local/bin/execute-cli-command.sh safe-restart
   checkJenkinsIsUp
 fi
