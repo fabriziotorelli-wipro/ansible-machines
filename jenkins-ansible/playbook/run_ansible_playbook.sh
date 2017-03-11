@@ -4,6 +4,7 @@ PLAYBOOK_FOLDER="/usr/local/share/ansible/playbook"
 #Ensure the process to be up ...
 /bin/bash &
 
+#Check pre-start Jenkins ...
 if [[ "true" == "$PRESTART_JENKINS" ]]; then
   echo "Pre-Starting Jenkins ..."
   jenkins.sh &
@@ -11,6 +12,7 @@ if [[ "true" == "$PRESTART_JENKINS" ]]; then
 fi
 
 
+#Check Jenkins come up and running ...
 function checkJenkinsIsUp {
   COUNTER=0
   echo "Waiting for Jenkins to be up and running ..."
@@ -26,6 +28,7 @@ function checkJenkinsIsUp {
 
 PREPARED="$(ls /usr/local/share/ansible/playbook/.prepared)"
 
+#Prepare security and templates and then clone and checkout the repos  ...
 if [[ -z "$PREPARED" ]]; then
   export CURRPWD="$PWD"
   if ! [[ -z "$PRIVATE_PUBLIC_KEY_TAR_URL" ]]; then
@@ -38,11 +41,6 @@ if [[ -z "$PREPARED" ]]; then
       tar -xvf ../keys.tar
       rm -f /var/jenkins_home/keys.tar
       chmod 600 -f /var/jenkins_home/.ssh/id_rsa*
-      # sudo cp /var/jenkins_home/.ssh/* /root/.ssh/
-      # Removing credential due to a distribution security issues
-      # Credential should be defined in the ansible and
-      # Specific Jenkins ones, at all
-      # rm -f /var/jenkins_home/.ssh/*
       cd $CURRPWD
     fi
   else
@@ -132,34 +130,32 @@ if [[ -z "$PREPARED" ]]; then
   sudo cat /etc/hosts
   cp $PLAYBOOK_FOLDER/inventory/localhost $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
   echo "$ANSIBLE_HOSTNAME      ansible_connection=local" >> $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
-  #Defining your credential for root
+  #Defining your credential for jenkins
   git config --global --add user.name $USER_NAME
   git config --global --add user.email $USER_EMAIL
-  #As root we clone the 'main' repo and than we give grants to jenkins, removing the .git folder, no remote interaction allowed
+  #As jenkins we clone the 'main' repo and than we give grants to jenkins, removing the .git folder, no remote interaction allowed
   git clone $MAIN_REPO_URL $PLAYBOOK_FOLDER/main && cd $PLAYBOOK_FOLDER/main && git checkout $MAIN_REPO_BRANCH && git fetch && rm -Rf .git
   cd $PLAYBOOK_FOLDER
-  # sudo chown -Rf jenkins:jenkins $PLAYBOOK_FOLDER/main
   #Here we simply ridefine the ansible.cfg, in a real world we should che the existing and changing parammeters in, no time just right now
   PARSED_FOLDER="$(echo "$ROLES_REPO_FOLDER" | sed 's/\//\\\//g' )"
   sed -e "s/ROLES_PATH/\/usr\/local\/share\/ansible\/playbook\/roles\/$PARSED_FOLDER/g" $PLAYBOOK_FOLDER/template/ansible.cfg > $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER/ansible.cfg
-  #As root we clone the 'roles' repo and than we give grants to jenkins, removing the .git folder, no remote interaction allowed
+  #As jenkins we clone the 'roles' repo and than we give grants to jenkins, removing the .git folder, no remote interaction allowed
   git clone $ROLES_REPO_URL $PLAYBOOK_FOLDER/roles && cd $PLAYBOOK_FOLDER/roles && git checkout $ROLES_REPO_BRANCH && git fetch && rm -Rf .git
   cd $PLAYBOOK_FOLDER
-  # sudo chown -Rf jenkins:jenkins $PLAYBOOK_FOLDER/roles
-  #Fake prepare of variables
+  #Fake prepare of variables, we can improve this section adding a seeding variable
   cp $PLAYBOOK_FOLDER/template/vars $PLAYBOOK_FOLDER/
   # Removing credential due to a distribution security issues
   # Credential should be defined in the ansible and
   # Specific Jenkins ones, at all
   git config --global --unset user.name
   git config --global --unset user.email
-#  sudo rm -f /root/.ssh/id_rsa*
   rm -f /var/jenkins_home/.ssh/id_rsa*
   touch $PLAYBOOK_FOLDER/.prepared
 fi
 
 INSTALLED="$(ls /usr/local/share/ansible/playbook/.installed)"
 FAILED=""
+#Starting the ansible playbooks ...
 if [[ -z "$INSTALLED" ]]; then
   echo "Installation of roles in progress ..."
   cd $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER
@@ -179,27 +175,32 @@ if [[ -z "$INSTALLED" ]]; then
     touch $PLAYBOOK_FOLDER/.installed
   fi
 fi
+#Check and define the hostname ....
 MACHINE_HOST="$(hostname)"
 if [[ "$HOSTNAME.$RIGLETDOMAIN" != "$MACHINE_HOST" ]]; then
   echo "Setting up host to $HOSTNAME.$RIGLETDOMAIN ..."
   sudo hostname $HOSTNAME.$RIGLETDOMAIN
 fi
 echo "All done!!"
+#Check post-start Jenkins ....
 if [[ "true" != "$PRESTART_JENKINS" ]]; then
   echo "Post-Starting Jenkins ..."
   jenkins.sh &
   checkJenkinsIsUp
 fi
 
+#Check re-start Jenkins ....
 if [[ "true" == "$RESTART_JENKINS_AFTER_ANSIBLE" ]]; then
   echo "Re-Starting Jenkins ..."
   /usr/local/bin/execute-cli-command.sh safe-restart
   checkJenkinsIsUp
 fi
 
+#Check Jenkins logs ....
 if [[ -e /var/log/jenkins/jenkins.log ]]; then
   tail -f /var/log/jenkins/jenkins.log
 fi
 
+#Wait forever ....
 watch -n 86400 $PLAYBOOK_FOLDER/run_ansible_playbook.sh
 echo "Exit for Jenkins Container ..."

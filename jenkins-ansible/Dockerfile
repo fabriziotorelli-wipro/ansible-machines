@@ -69,14 +69,6 @@ RUN update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/jav
 
 USER jenkins
 
-# install plugins; the plugins.txt file can be exported from Jenkins like this:
-# JENKINS_HOST=username:password@myhost.com:port
-# curl -sSL "http://$JENKINS_HOST/pluginManager/api/xml?depth=1&xpath=/*/*/shortName|/*/*/version&wrapper=plugins" | perl -pe 's/.*?<shortName>([\w-]+).*?<version>([^<]+)()(<\/\w+>)+/\1 \2\n/g'|sed 's/ /:/' > jenkins-master/conf/plugins.txt
-
-#Plugins are defined in the ansible
-#COPY conf/plugins.txt /var/jenkins_home/plugins.txt
-#RUN /usr/local/bin/plugins.sh /var/jenkins_home/plugins.txt
-
 # "For 2.x-derived images, you may also want to" - we're 2.0 dervied, so we want this
 RUN echo "$JENKINS_VERSION" > /usr/share/jenkins/ref/jenkins.install.UpgradeWizard.state
 RUN echo "$JENKINS_VERSION" > /usr/share/jenkins/ref/jenkins.install.InstallUtil.lastExecVersion
@@ -85,5 +77,3 @@ WORKDIR /usr/local/share/ansible/playbook
 
 CMD ["/bin/bash", "-c", "run_ansible_playbook.sh"]
 EXPOSE 8080 50000
-
-#ENTRYPOINT ["/bin/bash"]
