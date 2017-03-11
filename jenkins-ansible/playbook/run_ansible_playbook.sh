@@ -4,6 +4,13 @@ PLAYBOOK_FOLDER="/usr/local/share/ansible/playbook"
 #Ensure the process to be up ...
 /bin/bash &
 
+if [[ "true" == "$PRESTART_JENKINS" ]]; then
+  echo "Pre-Starting Jenkins ..."
+  jenkins.sh &
+  checkJenkinsIsUp
+fi
+
+
 function checkJenkinsIsUp {
   COUNTER=0
   echo "Waiting for Jenkins to be up and running ..."
@@ -178,9 +185,18 @@ if [[ "$HOSTNAME.$RIGLETDOMAIN" != "$MACHINE_HOST" ]]; then
   sudo hostname $HOSTNAME.$RIGLETDOMAIN
 fi
 echo "All done!!"
-echo "Starting Jenkins ..."
-jenkins.sh &
-checkJenkinsIsUp
+if [[ "true" != "$PRESTART_JENKINS" ]]; then
+  echo "Post-Starting Jenkins ..."
+  jenkins.sh &
+  checkJenkinsIsUp
+fi
+
+if [[ "true" != "$RESTART_JENKINS_AFTER_ANSIBLE" ]]; then
+  echo "Re-Starting Jenkins ..."
+  /usr/local/bin/execute-cli-command.sh safe-restart
+  checkJenkinsIsUp
+fi
+
 if [[ -e /var/log/jenkins/jenkins.log ]]; then
   tail -f /var/log/jenkins/jenkins.log
 fi

@@ -17,6 +17,8 @@ ENV MAIN_REPO_URL="" \
     RIGLETDOMAIN="" \
     PRIVATE_PUBLIC_KEY_TAR_URL="" \
     PLUGINS_TEXT_FILE_URL="" \
+    PRESTART_JENKINS="true" \
+    RESTART_JENKINS_AFTER_ANSIBLE="false" \
     PATH=/usr/local/share/ansible/playbook:$PATH \
     JAVA_OPTS="-Xmx4096m -Djenkins.install.runSetupWizard=false" \
     JENKINS_OPTS="--logfile=/var/log/jenkins/jenkins.log --webroot=/var/cache/jenkins/war" \

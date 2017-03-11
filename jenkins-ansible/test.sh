@@ -19,6 +19,8 @@ USER_CREDENTIALS=""
 ANSIBLE_HOSTNAME="jenkins"
 HOSTNAME="jenkins"
 RIGLETDOMAIN="riglet"
+PRESTART_JENKINS="false"
+RESTART_JENKINS_AFTER_ANSIBLE="false"
 PRIVATE_PUBLIC_KEY_TAR_URL="https://github.com/hellgate75/online-keys/raw/master/20170311/jenkins/keys.tar"
 PLUGINS_TEXT_FILE_URL=""
 docker run -d  -p 8080:8080 -p 50000:50000 --privileged -e "MAIN_REPO_URL=$MAIN_REPO_URL" -e "PLAYBOOKS=$PLAYBOOKS" \
@@ -26,7 +28,8 @@ docker run -d  -p 8080:8080 -p 50000:50000 --privileged -e "MAIN_REPO_URL=$MAIN_
           -e "ROLES_REPO_BRANCH=$ROLES_REPO_BRANCH" -e "ROLES_REPO_FOLDER=$ROLES_REPO_FOLDER" -e "USER_NAME=$USER_NAME" \
           -e "USER_EMAIL=$USER_EMAIL" -e "USER_CREDENTIALS=$USER_CREDENTIALS" -e "ANSIBLE_HOSTNAME=$ANSIBLE_HOSTNAME" \
           -e "RIGLETDOMAIN=$RIGLETDOMAIN" -e "HOSTNAME=$HOSTNAME" -e "PRIVATE_PUBLIC_KEY_TAR_URL=$PRIVATE_PUBLIC_KEY_TAR_URL" \
-          -e "PLUGINS_TEXT_FILE_URL=$PLUGINS_TEXT_FILE_URL" -e "container=docker" \
+          -e "PLUGINS_TEXT_FILE_URL=$PLUGINS_TEXT_FILE_URL" -e "PRESTART_JENKINS=$PRESTART_JENKINS" \
+          -e "RESTART_JENKINS_AFTER_ANSIBLE=$RESTART_JENKINS_AFTER_ANSIBLE" -e "container=docker" \
           --cap-add SYS_ADMIN --security-opt seccomp:unconfined -v /sys/fs/cgroup:/sys/fs/cgroup \
           -it --name jenkins-ansible buildit/jenkins-ansible:2.32.3
 docker logs -f jenkins-ansible
