@@ -62,6 +62,7 @@ RUN mkdir /var/cache/jenkins
 RUN chown -R  jenkins:jenkins /var/log/jenkins
 RUN chown -R  jenkins:jenkins /var/cache/jenkins
 RUN chown -R  jenkins:jenkins /usr/share/jenkins
+RUN usermod -aG ssh jenkins
 
 USER jenkins
 

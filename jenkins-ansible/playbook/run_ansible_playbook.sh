@@ -26,11 +26,16 @@ if [[ -z "$PREPARED" ]]; then
     wget "$PRIVATE_PUBLIC_KEY_TAR_URL" -O /var/jenkins_home/keys.tar
     if [[ -e /var/jenkins_home/keys.tar ]]; then
       echo "decompressing in .ssh path ..."
+      mkdir -p /var/jenkins_home/.ssh
       cd /var/jenkins_home/.ssh
       tar -xvf ../keys.tar
       rm -f /var/jenkins_home/keys.tar
       chmod 600 -f /var/jenkins_home/.ssh/id_rsa*
-      sudo cp /var/jenkins_home/.ssh/* /root/.ssh/
+      # sudo cp /var/jenkins_home/.ssh/* /root/.ssh/
+      # Removing credential due to a distribution security issues
+      # Credential should be defined in the ansible and
+      # Specific Jenkins ones, at all
+      # rm -f /var/jenkins_home/.ssh/*
       cd $CURRPWD
     fi
   else
@@ -120,18 +125,20 @@ if [[ -z "$PREPARED" ]]; then
   sudo cat /etc/hosts
   cp $PLAYBOOK_FOLDER/inventory/localhost $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
   echo "$ANSIBLE_HOSTNAME      ansible_connection=local" >> $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
-  sudo git config --global --add user.name $USER_NAME
-  sudo git config --global --add user.email $USER_EMAIL
+  #Defining your credential for root
   git config --global --add user.name $USER_NAME
   git config --global --add user.email $USER_EMAIL
+  #As root we clone the 'main' repo and than we give grants to jenkins, removing the .git folder, no remote interaction allowed
   git clone $MAIN_REPO_URL $PLAYBOOK_FOLDER/main && cd $PLAYBOOK_FOLDER/main && git checkout $MAIN_REPO_BRANCH && git fetch && sudo git pull && rm -Rf .git
   cd $PLAYBOOK_FOLDER
-#  sudo chown -Rf jenkins:jenkins $PLAYBOOK_FOLDER/main
+  # sudo chown -Rf jenkins:jenkins $PLAYBOOK_FOLDER/main
+  #Here we simply ridefine the ansible.cfg, in a real world we should che the existing and changing parammeters in, no time just right now
   PARSED_FOLDER="$(echo "$ROLES_REPO_FOLDER" | sed 's/\//\\\//g' )"
   sed -e "s/ROLES_PATH/\/usr\/local\/share\/ansible\/playbook\/roles\/$PARSED_FOLDER/g" $PLAYBOOK_FOLDER/template/ansible.cfg > $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER/ansible.cfg
+  #As root we clone the 'roles' repo and than we give grants to jenkins, removing the .git folder, no remote interaction allowed
   git clone $ROLES_REPO_URL $PLAYBOOK_FOLDER/roles && cd $PLAYBOOK_FOLDER/roles && git checkout $ROLES_REPO_BRANCH && git fetch && sudo git pull && rm -Rf .git
   cd $PLAYBOOK_FOLDER
-#  sudo chown -Rf jenkins:jenkins $PLAYBOOK_FOLDER/roles
+  # sudo chown -Rf jenkins:jenkins $PLAYBOOK_FOLDER/roles
   #Fake prepare of variables
   cp $PLAYBOOK_FOLDER/template/vars $PLAYBOOK_FOLDER/
   # Removing credential due to a distribution security issues
@@ -139,6 +146,7 @@ if [[ -z "$PREPARED" ]]; then
   # Specific Jenkins ones, at all
   git config --global --unset user.name
   git config --global --unset user.email
+#  sudo rm -f /root/.ssh/id_rsa*
   rm -f /var/jenkins_home/.ssh/id_rsa*
   touch $PLAYBOOK_FOLDER/.prepared
 fi
