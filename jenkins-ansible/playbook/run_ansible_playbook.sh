@@ -191,7 +191,7 @@ if [[ "true" != "$PRESTART_JENKINS" ]]; then
   checkJenkinsIsUp
 fi
 
-if [[ "true" != "$RESTART_JENKINS_AFTER_ANSIBLE" ]]; then
+if [[ "true" == "$RESTART_JENKINS_AFTER_ANSIBLE" ]]; then
   echo "Re-Starting Jenkins ..."
   /usr/local/bin/execute-cli-command.sh safe-restart
   checkJenkinsIsUp
