@@ -1,2 +1,2 @@
 version: "1.0"
-product: "Centos 7 BuildIt ansible container"
+product: "Debian 8 Jenkins BuildIt ansible container"

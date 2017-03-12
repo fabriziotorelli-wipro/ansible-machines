@@ -3,7 +3,7 @@ if ! [[ -z "$(docker ps -a| grep jenkins-ansible)" ]]; then
    if ! [[ -z "$(docker ps| grep jenkins-ansible)" ]]; then
       docker stop jenkins-ansible
    fi
-   docker commit -a "Fabrizio Torelli <fabrizio.torelli@wipro.com>" -m "Microservices Pipeline - Ansible Jenkins" -c "ENV PLAYBOOKS=microservices-recreate" -c "CMD rm -f /usr/local/share/ansible/playbook/.installed && /usr/local/share/ansible/playbook/run_ansible_playbook.sh"  jenkins-ansible builditftorelli/jenkins-microservices:2.32.3
+   docker commit -a "Fabrizio Torelli <fabrizio.torelli@wipro.com>" -m "Microservices Pipeline - Ansible Jenkins" -c "ENV PLAYBOOKS=microservices,microservices-recreate" -c "CMD rm -f /usr/local/share/ansible/playbook/.prepared && rm -Rf /usr/local/share/ansible/playbook/main && rm -Rf /usr/local/share/ansible/playbook/roles  && rm -f /usr/local/share/ansible/playbook/.installed && /usr/local/share/ansible/playbook/run_ansible_playbook.sh"  jenkins-ansible builditftorelli/jenkins-microservices:2.32.3
    echo "Starting a test container ..."
    docker run -d --name jenkins-microservices -p 8080:8080 -p 50000:50000 -it builditftorelli/jenkins-microservices:2.32.3
    docker logs -f jenkins-microservices

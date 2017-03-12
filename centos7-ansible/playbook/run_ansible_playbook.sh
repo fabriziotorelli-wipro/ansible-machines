@@ -60,5 +60,5 @@ fi
 echo "All done!!"
 
 #while (true) do sleep 86400; done
-watch -n 86400 /opt/ansible/playbook/run_ansible_playbook.sh
+tail -f /opt/ansible/playbook/run_ansible_playbook.sh
 #dr_scripts_ref
