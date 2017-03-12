@@ -54,7 +54,6 @@ RUN chmod 777 /usr/local/share/ansible/playbook/run_ansible_playbook.sh && \
     mv /usr/local/share/ansible/playbook/template/stop-postgresql.sh /usr/local/bin/stop-postgresql.sh && \
     mv /usr/local/share/ansible/playbook/template/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh && \
     rm -f /docker-entrypoint.sh && \
-    ln -s /usr/local/bin/postgresql-entrypoint.sh / && \
     ln -s /usr/local/bin/docker-entrypoint.sh / && \
     mkdir -p /home/postgres/.ssh && \
     mkdir -p /postgres-entrypoint-initdb.d && \
@@ -62,7 +61,7 @@ RUN chmod 777 /usr/local/share/ansible/playbook/run_ansible_playbook.sh && \
     chown -Rf postgres:postgres /postgres-entrypoint-initdb.d && \
     chown -Rf postgres:postgres /var/lib/postgresql && \
     chown -Rf postgres:postgres /home/postgres && \
-    chmod 700 /var/lib/postgresql/data &$ \
+    chmod 700 /var/lib/postgresql/data && \
     chown -Rf postgres:postgres /usr/local/share/ansible/playbook
 
 RUN apt-get -y autoremove && \
