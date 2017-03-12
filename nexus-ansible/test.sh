@@ -3,6 +3,10 @@ EXISTS="$(docker ps -a|grep nexus-ansible)"
 if ! [[ -z "$EXISTS" ]]; then
   docker rm -f nexus-ansible
 fi
+EXISTS="$(docker ps -a|grep nexus-ansible-volumes)"
+if ! [[ -z "$EXISTS" ]]; then
+  docker rm -f nexus-ansible-volumes
+fi
 # --cap-add SYS_ADMIN --security-opt seccomp:unconfined
 #--privileged -e "container=docker" -v /sys/fs/cgroup:/sys/fs/cgroup
 #docker run -d  -p 8080:8080 -p 50000:50000 --privileged -e "PLUGINS_TEXT_FILE_URL=https://github.com/fabriziotorelli-wipro/ansible-machines/raw/master/nexus-ansible/plugins.txt" -e "PRIVATE_PUBLIC_KEY_TAR_URL=https://github.com/fabriziotorelli-wipro/ansible-machines/raw/master/nexus-ansible/keys.tar" -e "container=docker" --cap-add SYS_ADMIN --security-opt seccomp:unconfined -v /sys/fs/cgroup:/sys/fs/cgroup -it --name nexus-ansible buildit/nexus-ansible:oss

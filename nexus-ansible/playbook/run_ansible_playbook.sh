@@ -140,7 +140,7 @@ INSTALLED="$(ls /usr/local/share/ansible/playbook/.installed)"
 FAILED=""
 #Starting the ansible playbooks ...
 if [[ -z "$INSTALLED" ]]; then
-  echo "Installation of roles in progress ..."
+  echo "Installation of playbooks in progress ..."
   cd $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER
   echo "Playbooks Installation forlder: $PWD"
   for i in ${PLAYBOOKS//,/ }
@@ -185,7 +185,7 @@ if [[ "true" != "$PRESTART_NEXUS" ]] && [[ "true" == "$POSTSTART_NEXUS" ]]; then
     else
       echo "Post-Ansible: No start to apply, waiting for Nexus Restart ..."
     fi
-  fi;
+  fi
 fi
 
 #Check re-start Nexus ....
