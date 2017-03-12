@@ -1,0 +1,3 @@
+version: "1.0"
+product: "Centos 7 BuildIt ansible container"
+ansible_user: postgres
