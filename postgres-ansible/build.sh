@@ -5,15 +5,15 @@
 # cd ..
 EXISTS="$(docker images|grep 'buildit/postgres-ansible')"
 if ! [[ -z "$EXISTS" ]]; then
-  docker rmi -f builditftorelli/postgres-ansible:9.6.2
-  docker rmi -f buildit/postgres-ansible:9.6.2
+  docker rmi -f builditftorelli/postgresql-ansible:9.6.2
+  docker rmi -f buildit/postgresql-ansible:9.6.2
 fi
 if ! [[ -z "$(docker images|grep -v 'IMAGE'|grep -i '<none>')" ]]; then
   docker images|grep -v 'IMAGE'|grep -i '<none>'|awk 'BEGIN {FS=OFS=" "}{print $3}'|xargs docker rmi -f
 fi
 #rm -f playbook.tgz
 #tar -cvzf playbook.tgz playbook
-docker build --compress --no-cache --rm --force-rm --tag buildit/postgres-ansible:9.6.2 ./
+docker build --compress --no-cache --rm --force-rm --tag buildit/postgresql-ansible:9.6.2 ./
 # Usage:	docker load [OPTIONS]
 # Load an image from a tar archive or STDIN
 # Options:
@@ -26,4 +26,4 @@ docker build --compress --no-cache --rm --force-rm --tag buildit/postgres-ansibl
 # Options:
 #       --help            Print usage
 #   -o, --output string   Write to a file, instead of STDOUT
-docker tag buildit/postgres-ansible:9.6.2 builditftorelli/postgres-ansible:9.6.2
+docker tag buildit/postgresql-ansible:9.6.2 builditftorelli/postgresql-ansible:9.6.2

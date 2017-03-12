@@ -1,7 +1,7 @@
 #!/bin/bash
-EXISTS="$(docker ps -a|grep postgres-ansible)"
+EXISTS="$(docker ps -a|grep postgresql-ansible)"
 if ! [[ -z "$EXISTS" ]]; then
-  docker exec -it postgres-ansible bash
+  docker exec -it postgresql-ansible bash
 else
-  echo "Container postgres-ansible not found ..."
+  echo "Container postgresql-ansible not found ..."
 fi

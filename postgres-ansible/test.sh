@@ -1,11 +1,11 @@
 #!/bin/bash
-EXISTS="$(docker ps -a|grep postgres-ansible)"
+EXISTS="$(docker ps -a|grep postgresql-ansible)"
 if ! [[ -z "$EXISTS" ]]; then
-  docker rm -f postgres-ansible
+  docker rm -f postgresql-ansible
 fi
-EXISTS="$(docker ps -a|grep postgres-ansible-volumes)"
+EXISTS="$(docker ps -a|grep postgresql-ansible-volumes)"
 if ! [[ -z "$EXISTS" ]]; then
-  docker rm -f postgres-ansible-volumes
+  docker rm -f postgresql-ansible-volumes
 fi
 docker volume prune -f
 MAIN_REPO_URL="git@bitbucket.org:digitalrigbitbucketteam/digitalrig-riglet.git"
@@ -35,7 +35,7 @@ docker run -d  --privileged -e "MAIN_REPO_URL=$MAIN_REPO_URL" -e "PLAYBOOKS=$PLA
           -e "POSTSTART_POSTGRES=$POSTSTART_POSTGRES" -e "PRESTART_POSTGRES=$PRESTART_POSTGRES" -e "container=docker" \
           -e "POSTGRES_DB=$POSTGRES_DB" -e "POSTGRES_OS_USER=$POSTGRES_OS_USER" -e "POSTGRES_OS_GROUP=$POSTGRES_OS_GROUP" \
           -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" --cap-add SYS_ADMIN --security-opt seccomp:unconfined -v /sys/fs/cgroup:/sys/fs/cgroup \
-          -it --name postgres-ansible-volumes builditftorelli/postgres-ansible:9.6.2 echo "I am just a volume source!!"
+          -it --name postgresql-ansible-volumes builditftorelli/postgresql-ansible:9.6.2 echo "I am just a volume source!!"
 if [[ -e /vagrant/volumes/postgresql ]]; then
   rm -Rf /vagrant/volumes/postgresql
 fi
@@ -48,6 +48,6 @@ docker run -d  -p 5432:5432 --privileged -e "MAIN_REPO_URL=$MAIN_REPO_URL" -e "P
           -e "POSTSTART_POSTGRES=$POSTSTART_POSTGRES" -e "PRESTART_POSTGRES=$PRESTART_POSTGRES" -e "container=docker" \
           -e "POSTGRES_DB=$POSTGRES_DB" -e "POSTGRES_OS_USER=$POSTGRES_OS_USER" -e "POSTGRES_OS_GROUP=$POSTGRES_OS_GROUP" \
           -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" --cap-add SYS_ADMIN --security-opt seccomp:unconfined \
-          -v /sys/fs/cgroup:/sys/fs/cgroup -it --volumes-from postgres-ansible-volumes postgres-ansible-volumes \
-          --name postgres-ansible --user postgres:postgres builditftorelli/postgres-ansible:9.6.2
-docker logs -f postgres-ansible
+          -v /sys/fs/cgroup:/sys/fs/cgroup -it --volumes-from postgresql-ansible-volumes \
+          --name postgresql-ansible --user postgres:postgres builditftorelli/postgresql-ansible:9.6.2
+docker logs -f postgresql-ansible

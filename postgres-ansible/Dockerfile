@@ -84,4 +84,4 @@ CMD ["/bin/bash", "-c", "run_ansible_playbook.sh"]
 
 EXPOSE 5432
 
-VOLUME ["/var/lib/postgresql/data", "/postgres-entrypoint-initdb.d"]
+VOLUME ["/var/lib/postgresql/data", "/docker-entrypoint-initdb.d", "/postgres-entrypoint-initdb.d"]

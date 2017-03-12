@@ -40,8 +40,6 @@ if [ "$1" = 'postgres' ] && [ "$(id -u)" = '0' ]; then
 	exec gosu postgres "$BASH_SOURCE" "$@"
 fi
 
-echo "Here ... : $1"
-
 if [[ "$1" == "postgres" ]]; then
 	echo "PGDATA : $PGDATA"
 	mkdir -p "$PGDATA"
@@ -113,7 +111,7 @@ if [[ "$1" == "postgres" ]]; then
 		EOSQL
 		echo
 
-		echo "Full privileges fro user : $POSTGRES_USER on database: $POSTGRES_DB"
+		echo "Full privileges for user : $POSTGRES_USER on database: $POSTGRES_DB"
 	  "${psql[@]}" --username postgres <<-EOSQL
 			GRANT ALL PRIVILEGES ON DATABASE $POSTGRES_DB to $POSTGRES_USER ;
 		EOSQL

@@ -70,8 +70,11 @@ function checkPostgresIsUp {
 if [[ -z "$(sudo cat /etc/passwd | grep $POSTGRES_USER)" ]]; then
   echo "Pre-Ansible: Defining user and rights for $POSTGRES_USER ..."
   sudo useradd --create-home --home-dir /home/$POSTGRES_USER --password $POSTGRES_PASSWORD $POSTGRES_USER
+  sudo groupadd sudoers
   sudo usermod -aG ssh $POSTGRES_USER
   sudo usermod -aG sudoers $POSTGRES_USER
+  sudo usermod -aG ssh root
+  sudo usermod -aG sudoers root
   sudo su root -c "cp /etc/sudoers /home/postgres/sudoers && chmod 777 /home/postgres/sudoers &&  echo \"$POSTGRES_USER  ALL=(ALL) NOPASSWD:ALL\" >> /home/postgres/sudoers && chmod 400 /home/postgres/sudoers && cat /home/postgres/sudoers > /etc/sudoers && rm -f /home/postgres/sudoers"
 fi
 if ! [[ -z "$POSTGRES_OS_USER" ]] && [[ "$POSTGRES_USER" != "$POSTGRES_OS_USER" ]]; then
