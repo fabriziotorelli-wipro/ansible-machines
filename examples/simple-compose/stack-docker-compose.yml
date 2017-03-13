@@ -1,0 +1,181 @@
+version: "2"
+
+services:
+  sonarqube_db_volumes:
+    image: builditftorelli/postgresql-ansible:9.6.2
+    container_name: sonardb-ansible-compose-volumes
+    entrypoint: ['/bin/bash']
+    command: ['/bin/bash']
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+  sonarqube_db:
+    image: builditftorelli/postgresql-ansible:9.6.2
+    container_name: sonardb-ansible-compose
+    privileged: true
+    restart: unless-stopped
+    domainname: sonar-db.riglet
+    hostname: sonar-db
+    environment:
+      - MAIN_REPO_URL=git@bitbucket.org:digitalrigbitbucketteam/digitalrig-riglet.git
+      - MAIN_REPO_BRANCH=microservices-poc-rancher
+      - MAIN_REPO_FOLDER=ec2
+      - ROLES_REPO_URL=git@bitbucket.org:digitalrigbitbucketteam/dr-scripts.git
+      - ROLES_REPO_BRANCH=microservices-poc-rancher
+      - ROLES_REPO_FOLDER=roles
+      - PLAYBOOKS=../postgresql
+      - USER_NAME=fabriziotorelli
+      - USER_EMAIL=fabrizio.torelli@wipro.com
+      - ANSIBLE_HOSTNAME=postgres
+      - HOSTNAME=sonar-db
+      - RIGLETDOMAIN=riglet
+      - PRESTART_POSTGRES=true
+      - POSTGRES_PASSWORD=4n4lys1s
+      - POSTGRES_USER=sonarqube
+      - POSTGRES_DB=sonarqube
+      - POSTGRES_OS_USER=
+      - POSTGRES_OS_GROUP=
+      - PRIVATE_PUBLIC_KEY_TAR_URL=https://github.com/hellgate75/online-keys/raw/master/20170311/postgres/keys.tar
+    ports:
+      - 5432:5432
+    cap_add:
+      - IPC_LOCK
+      - SYS_ADMIN
+    ulimits:
+      memlock: -1
+    volumes_from:
+      - sonarqube_db_volumes
+  sonarqube_volumes:
+    image: builditftorelli/postgresql-ansible:9.6.2
+    container_name: sonarqube-ansible-compose-volumes
+    entrypoint: ['/bin/bash']
+    command: ['/bin/bash']
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+  sonarqube:
+    links:
+      - sonarqube_db:sonar-db.riglet
+    image: builditftorelli/sonarqube-ansible:6.2
+    container_name: sonarqube-ansible-compose
+    privileged: true
+    restart: unless-stopped
+    domainname: sonar.riglet
+    hostname: sonar
+    environment:
+      - MAIN_REPO_URL=git@bitbucket.org:digitalrigbitbucketteam/digitalrig-riglet.git
+      - MAIN_REPO_BRANCH=microservices-poc-rancher
+      - MAIN_REPO_FOLDER=ec2
+      - ROLES_REPO_URL=git@bitbucket.org:digitalrigbitbucketteam/dr-scripts.git
+      - ROLES_REPO_BRANCH=microservices-poc-rancher
+      - ROLES_REPO_FOLDER=roles
+      - PLAYBOOKS=../sonar
+      - USER_NAME=fabriziotorelli
+      - USER_EMAIL=fabrizio.torelli@wipro.com
+      - USER_CREDENTIALS=
+      - ANSIBLE_HOSTNAME=sonar
+      - HOSTNAME=sonar
+      - RIGLETDOMAIN=riglet
+      - PRESTART_SONARQUBE=false
+      - POSTSTART_SONARQUBE=false
+      - SONARQUBE_JDBC_USERNAME=sonarqube
+      - SONARQUBE_JDBC_PASSWORD=4n4lys1s
+      - SONARQUBE_JDBC_URL=jdbc:postgresql://sonar-db.riglet:5432/sonarqube
+      - SONARQUBE_WEB_JVM_OPTS=
+      - SONARQUBE_ANSIBLE_DEFINED_CONTEXT_PATH=/sonar
+      - RESTART_SONARQUBE_AFTER_ANSIBLE=true
+      - PRIVATE_PUBLIC_KEY_TAR_URL=https://github.com/hellgate75/online-keys/raw/master/20170311/sonarqube/keys.tar
+    ports:
+      - 9000:9000
+      - 9092:9092
+    cap_add:
+      - IPC_LOCK
+      - SYS_ADMIN
+    ulimits:
+      memlock: -1
+    volumes_from:
+      - sonarqube_volumes
+  nexus_volumes:
+    image: builditftorelli/postgresql-ansible:9.6.2
+    container_name: nexus-ansible-compose-volumes
+    entrypoint: ['/bin/bash']
+    command: ['/bin/bash']
+    volumes:
+        - /sys/fs/cgroup:/sys/fs/cgroup
+  nexus:
+    image: builditftorelli/nexus-ansible:oss
+    container_name: nexus-ansible-compose
+    privileged: true
+    restart: unless-stopped
+    domainname: nexus.riglet
+    hostname: nexus
+    environment:
+      - MAIN_REPO_URL=git@bitbucket.org:digitalrigbitbucketteam/digitalrig-riglet.git
+      - MAIN_REPO_BRANCH=microservices-poc-rancher
+      - MAIN_REPO_FOLDER=ec2
+      - ROLES_REPO_URL=git@bitbucket.org:digitalrigbitbucketteam/dr-scripts.git
+      - ROLES_REPO_BRANCH=microservices-poc-rancher
+      - ROLES_REPO_FOLDER=roles
+      - PLAYBOOKS=../nexus
+      - USER_NAME=fabriziotorelli
+      - USER_EMAIL=fabrizio.torelli@wipro.com
+      - USER_CREDENTIALS=
+      - ANSIBLE_HOSTNAME=nexus
+      - HOSTNAME=nexus
+      - RIGLETDOMAIN=riglet
+      - PRESTART_NEXUS=false
+      - POSTSTART_NEXUS=false
+      - RESTART_NEXUS_AFTER_ANSIBLE=true
+      - PRIVATE_PUBLIC_KEY_TAR_URL=https://github.com/hellgate75/online-keys/raw/master/20170311/nexus/keys.tar
+    ports:
+      - 9003:8081
+    cap_add:
+      - IPC_LOCK
+      - SYS_ADMIN
+    ulimits:
+      memlock: -1
+    volumes_from:
+      - nexus_volumes
+  jenkins_volumes:
+    image: builditftorelli/jenkins-ansible:2.32.3
+    container_name: jenkins-ansible-compose-volumes
+    entrypoint: ['/bin/bash']
+    command: ['/bin/bash']
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+  jenkins:
+    links:
+      - sonarqube:sonar.riglet
+      - nexus:nexus.riglet
+    image: builditftorelli/jenkins-ansible:2.32.3
+    container_name: jenkins-ansible-compose
+    privileged: true
+    restart: unless-stopped
+    domainname: jenkins.riglet
+    hostname: jenkins
+    environment:
+      - MAIN_REPO_URL=git@bitbucket.org:digitalrigbitbucketteam/digitalrig-riglet.git
+      - MAIN_REPO_BRANCH=microservices-poc-rancher
+      - MAIN_REPO_FOLDER=ec2
+      - ROLES_REPO_URL=git@bitbucket.org:digitalrigbitbucketteam/dr-scripts.git
+      - ROLES_REPO_BRANCH=microservices-poc-rancher
+      - ROLES_REPO_FOLDER=roles
+      - PLAYBOOKS=../jenkins,microservices,microservices-recreate
+      - USER_NAME=fabriziotorelli
+      - USER_EMAIL=fabrizio.torelli@wipro.com
+      - USER_CREDENTIALS=
+      - ANSIBLE_HOSTNAME=jenkins
+      - HOSTNAME=jenkins
+      - RIGLETDOMAIN=riglet
+      - PRESTART_JENKINS=false
+      - RESTART_JENKINS_AFTER_ANSIBLE=false
+      - PRIVATE_PUBLIC_KEY_TAR_URL=https://github.com/hellgate75/online-keys/raw/master/20170311/jenkins/keys.tar
+      - PLUGINS_TEXT_FILE_URL=
+    ports:
+      - 8080:8080
+      - 50000:50000
+    cap_add:
+      - IPC_LOCK
+      - SYS_ADMIN
+    ulimits:
+      memlock: -1
+    volumes_from:
+      - jenkins_volumes

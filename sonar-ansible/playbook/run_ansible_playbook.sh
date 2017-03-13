@@ -33,7 +33,7 @@ function restartSonarQube {
 }
 
 function isSonarQubeRunning {
-  RUNNING="$(curl -I  --stderr /dev/null curl http://localhost:9000/ | head -1 | cut -d' ' -f2)"
+  RUNNING="$(curl -I  --stderr /dev/null curl http://localhost:9000$SONARQUBE_ANSIBLE_DEFINED_CONTEXT_PATH | head -1 | cut -d' ' -f2)"
   if [[ "200" != "$RUNNING" ]]; then
     eval "$1='false'"
   else
@@ -42,19 +42,19 @@ function isSonarQubeRunning {
 }
 
 function getSonarQubeState {
-  eval "$1=\"$( curl -I  --stderr /dev/null curl http://localhost:9000/ | head -1 | cut -d' ' -f2 )\""
+  eval "$1=\"$( curl -I  --stderr /dev/null curl http://localhost:9000$SONARQUBE_ANSIBLE_DEFINED_CONTEXT_PATH | head -1 | cut -d' ' -f2 )\""
 }
 
 #Check SonarQube come up and running ...
 function checkSonarQubeIsUp {
   COUNTER=0
   echo "Waiting for SonarQube to be up and running ..."
-  SONARQUBE_UP="$(curl -I  --stderr /dev/null curl http://localhost:9000/ | head -1 | cut -d' ' -f2)"
+  SONARQUBE_UP="$(curl -I  --stderr /dev/null curl http://localhost:9000$SONARQUBE_ANSIBLE_DEFINED_CONTEXT_PATH | head -1 | cut -d' ' -f2)"
   while [[ "200" != "$SONARQUBE_UP" && $COUNTER -lt 18 ]]
   do
     sleep 10
     echo "Waiting for SonarQube to be up and running ..."
-    SONARQUBE_UP="$(curl -I  --stderr /dev/null curl http://localhost:9000/ | head -1 | cut -d' ' -f2)"
+    SONARQUBE_UP="$(curl -I  --stderr /dev/null curl http://localhost:9000$SONARQUBE_ANSIBLE_DEFINED_CONTEXT_PATH | head -1 | cut -d' ' -f2)"
     let COUNTER=COUNTER+1
   done
 }

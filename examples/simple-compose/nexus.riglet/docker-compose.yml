@@ -34,7 +34,7 @@ services:
       - RESTART_NEXUS_AFTER_ANSIBLE=true
       - PRIVATE_PUBLIC_KEY_TAR_URL=https://github.com/hellgate75/online-keys/raw/master/20170311/nexus/keys.tar
     ports:
-      - 8082:8081
+      - 9003:8081
     cap_add:
       - IPC_LOCK
       - SYS_ADMIN

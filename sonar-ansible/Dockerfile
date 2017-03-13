@@ -27,6 +27,7 @@ ENV MAIN_REPO_URL="" \
     RESTART_SONARQUBE_AFTER_ANSIBLE="false" \
     PATH=/usr/local/share/ansible/playbook:/opt/sonarqube/bin:$PATH \
     SONARQUBE_HOME="/opt/sonarqube" \
+    SONARQUBE_ANSIBLE_DEFINED_CONTEXT_PATH="" \
     SONARQUBE_JDBC_USERNAME="" \
     SONARQUBE_JDBC_PASSWORD="" \
     SONARQUBE_JDBC_URL="" \

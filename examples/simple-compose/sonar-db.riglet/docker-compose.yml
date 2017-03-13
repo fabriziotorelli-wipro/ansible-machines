@@ -22,7 +22,7 @@ services:
       - ROLES_REPO_URL=git@bitbucket.org:digitalrigbitbucketteam/dr-scripts.git
       - ROLES_REPO_BRANCH=microservices-poc-rancher
       - ROLES_REPO_FOLDER=roles
-      - PLAYBOOKS=../sonar
+      - PLAYBOOKS=../postgresql
       - USER_NAME=fabriziotorelli
       - USER_EMAIL=fabrizio.torelli@wipro.com
       - ANSIBLE_HOSTNAME=postgres
