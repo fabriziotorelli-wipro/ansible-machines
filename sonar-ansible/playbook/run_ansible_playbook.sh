@@ -4,40 +4,36 @@ PLAYBOOK_FOLDER="/usr/local/share/ansible/playbook"
 #Ensure the process to be up ...
 /bin/bash &
 
-#Check pre-start Nexus ...
-if [[ "true" == "$PRESTART_NEXUS" ]]; then
-  echo "Pre-Ansible: Starting Nexus ..."
-  startNexus
-  checkNexusIsUp
+#Check pre-start SonarQube ...
+if [[ "true" == "$PRESTART_SONARQUBE" ]]; then
+  echo "Pre-Ansible: Starting SonarQube ..."
+  startSonarQube
+  checkSonarQubeIsUp
 fi
 
-function startNexus {
+function startSonarQube {
   # RUN_AS_USER=root
-  nexus start
+  start-sonarqube.sh
 }
 
-function stopNexus {
+function stopSonarQube {
   # RUN_AS_USER=root
-  nexus stop
+  stop-sonarqube.sh
 }
 
-function restartNexus {
+function restartSonarQube {
   RUNNING="false"
-  isNexusRunning RUNNING
+  isSonarQubeRunning RUNNING
   if [[ "true" == "$RUNNING" ]]; then
-    stopNexus
-    startNexus
+    stopSonarQube
+    startSonarQube
   else
-    startNexus
+    startSonarQube
   fi
 }
 
-function getNexusState {
-  eval "$1=\"$( curl -I  --stderr /dev/null curl http://localhost:8081/nexus/service/local/status | head -1 | cut -d' ' -f2 )\""
-}
-
-function isNexusRunning {
-  RUNNING="$( curl -I  --stderr /dev/null curl http://localhost:8081/nexus/service/local/status | head -1 | cut -d' ' -f2 )"
+function isSonarQubeRunning {
+  RUNNING="$(curl -I  --stderr /dev/null curl http://localhost:9000/ | head -1 | cut -d' ' -f2)"
   if [[ "200" != "$RUNNING" ]]; then
     eval "$1='false'"
   else
@@ -45,16 +41,20 @@ function isNexusRunning {
   fi
 }
 
-#Check Nexus come up and running ...
-function checkNexusIsUp {
+function getSonarQubeState {
+  eval "$1=\"$( curl -I  --stderr /dev/null curl http://localhost:9000/ | head -1 | cut -d' ' -f2 )\""
+}
+
+#Check SonarQube come up and running ...
+function checkSonarQubeIsUp {
   COUNTER=0
-  echo "Waiting for Nexus to be up and running ..."
-  NEXUS_UP="$(curl -I  --stderr /dev/null curl http://localhost:8081/nexus/service/local/status | head -1 | cut -d' ' -f2)"
-  while [[ "200" != "$NEXUS_UP" && $COUNTER -lt 18 ]]
+  echo "Waiting for SonarQube to be up and running ..."
+  SONARQUBE_UP="$(curl -I  --stderr /dev/null curl http://localhost:9000/ | head -1 | cut -d' ' -f2)"
+  while [[ "200" != "$SONARQUBE_UP" && $COUNTER -lt 18 ]]
   do
     sleep 10
-    echo "Waiting for Nexus to be up and running ..."
-    NEXUS_UP="$(curl -I  --stderr /dev/null curl http://localhost:8081/nexus/service/local/status | head -1 | cut -d' ' -f2)"
+    echo "Waiting for SonarQube to be up and running ..."
+    SONARQUBE_UP="$(curl -I  --stderr /dev/null curl http://localhost:9000/ | head -1 | cut -d' ' -f2)"
     let COUNTER=COUNTER+1
   done
 }
@@ -67,54 +67,40 @@ if [[ -z "$PREPARED" ]]; then
   export CURRPWD="$PWD"
   if ! [[ -z "$PRIVATE_PUBLIC_KEY_TAR_URL" ]]; then
     echo "Importing private/public keys from tar file ..."
-    wget "$PRIVATE_PUBLIC_KEY_TAR_URL" -O /sonatype-work/keys.tar
-    if [[ -e /sonatype-work/keys.tar ]]; then
+    wget "$PRIVATE_PUBLIC_KEY_TAR_URL" -O /root/keys.tar
+    if [[ -e /root/keys.tar ]]; then
       echo "decompressing in .ssh path ..."
-      mkdir -p /sonatype-work/.ssh
-      cd /sonatype-work/.ssh
+      mkdir -p /root/.ssh
+      cd /root/.ssh
       tar -xvf ../keys.tar
-      rm -f /sonatype-work/keys.tar
-      chmod 600 -f /sonatype-work/.ssh/id_rsa*
+      rm -f /root/keys.tar
+      chmod 600 -f /root/.ssh/id_rsa*
       cd $CURRPWD
     fi
   else
     echo "No key tar file specified or invalid url ..."
   fi
-  # echo "prepare command for jenkins java client interaction ..."
-
-  sudo mv $PLAYBOOK_FOLDER/is-running-nexus.sh /usr/local/bin/is-running-nexus.sh
-  sudo mv $PLAYBOOK_FOLDER/stop-nexus.sh /usr/local/bin/stop-nexus.sh
-  sudo mv $PLAYBOOK_FOLDER/start-nexus.sh /usr/local/bin/start-nexus.sh
-  sudo mv $PLAYBOOK_FOLDER/restart-nexus.sh /usr/local/bin/restart-nexus.sh
-
-  sudo chmod 777 /usr/local/bin/is-running-nexus.sh
-  sudo chmod 777 /usr/local/bin/stop-nexus.sh
-  sudo chmod 777 /usr/local/bin/start-nexus.sh
-  sudo chmod 777 /usr/local/bin/restart-nexus.sh
 
   echo "+---------------------------------------------------------------+"
   echo "| New Commands available :                                      |"
-  echo "| - Check Nexus JVM running :                                   |"
-  echo "|   is-running-nexus.sh                                         |"
-  echo "| - Restart Nexus without exit :                                |"
-  echo "|   restart-nexus.sh                                            |"
-  echo "| - Start Nexus command :                                       |"
-  echo "|   start-nexus.sh                                              |"
-  echo "| - Stop Nexus  without exit :                                  |"
-  echo "|   stop-nexus.sh                                               |"
+  echo "| - Start SonarQube :                                           |"
+  echo "|   start-sonarqube.sh                                          |"
+  echo "| - Stop SonarQube without exit :                               |"
+  echo "|   stop-sonarqube.sh                                           |"
+  echo "| - SonarQube status [on/off] command :                         |"
+  echo "|   sonarqube-status.sh                                         |"
   echo "+---------------------------------------------------------------+"
-  echo "Starting Nexus Ansible Playbooks ..."
+  echo "Starting SonarQube Ansible Playbooks ..."
   echo "Configuring ansible host to : $ANSIBLE_HOSTNAME"
   echo "Configuring machine host to : $HOSTNAME"
   echo "Configuring machine riglet domain to : $RIGLETDOMAIN"
-  sudo cat /etc/hosts > /sonatype-work/hosts
-  sudo chown nexus:nexus /sonatype-work/hosts
-  echo "127.0.0.1  localhost localhost.localdomain localhost.$RIGLETDOMAIN" >> /sonatype-work/hosts
-  echo "127.0.0.1  $HOSTNAME   $HOSTNAME.$RIGLETDOMAIN" >> /sonatype-work/hosts
-  sudo su -c "cat /sonatype-work/hosts > /etc/hosts"
-  rm -f  /sonatype-work/hosts
+  cat /etc/hosts > /root/hosts
+  echo "127.0.0.1  localhost localhost.localdomain localhost.$RIGLETDOMAIN" >> /root/hosts
+  echo "127.0.0.1  $HOSTNAME   $HOSTNAME.$RIGLETDOMAIN" >> /root/hosts
+  cat /root/hosts > /etc/hosts
+  rm -f  /root/hosts
   echo "New hosts file :"
-  sudo cat /etc/hosts
+  cat /etc/hosts
   cp $PLAYBOOK_FOLDER/inventory/localhost $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
   echo "$ANSIBLE_HOSTNAME      ansible_connection=local" >> $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
   #Defining your credential for jenkins
@@ -133,10 +119,10 @@ if [[ -z "$PREPARED" ]]; then
   cp $PLAYBOOK_FOLDER/template/vars $PLAYBOOK_FOLDER/
   # Removing credential due to a distribution security issues
   # Credential should be defined in the ansible and
-  # Specific Nexus ones, at all
+  # Specific SonarQube ones, at all
   git config --global --unset user.name
   git config --global --unset user.email
-  rm -f /sonatype-work/.ssh/id_rsa*
+  rm -f /root/.ssh/id_rsa*
   touch $PLAYBOOK_FOLDER/.prepared
 fi
 
@@ -144,7 +130,7 @@ INSTALLED="$(ls /usr/local/share/ansible/playbook/.installed)"
 FAILED=""
 #Starting the ansible playbooks ...
 if [[ -z "$INSTALLED" ]]; then
-  echo "Installation of playbooks in progress ..."
+  echo "Installation of roles in progress ..."
   cd $PLAYBOOK_FOLDER/main/$MAIN_REPO_FOLDER
   echo "Playbooks Installation forlder: $PWD"
   for i in ${PLAYBOOKS//,/ }
@@ -169,39 +155,42 @@ if [[ "$HOSTNAME.$RIGLETDOMAIN" != "$MACHINE_HOST" ]]; then
   sudo hostname $HOSTNAME.$RIGLETDOMAIN
 fi
 echo "All done!!"
-#Check post-start Nexus ....
-if [[ "true" != "$PRESTART_NEXUS" ]] && [[ "true" == "$POSTSTART_NEXUS" ]]; then
+#Check post-start SonarQube ....
+if [[ "true" != "$PRESTART_SONARQUBE" ]] && [[ "true" == "$POSTSTART_SONARQUBE" ]]; then
   STATE=""
-  getNexusState STATE
+  getSonarQubeState STATE
   if [[ "200" !=  "$STATE" ]]; then
-    echo "Post-Ansible: Starting Nexus ..."
-    startNexus
-    checkNexusIsUp
+    echo "Post-Ansible: Starting SonarQube ..."
+    startSonarQube
+    checkSonarQubeIsUp
   else
-    if [[ "true" != "$RESTART_NEXUS_AFTER_ANSIBLE" ]]; then
-        if [[ "true" == "$PRESTART_NEXUS_IF_UP_POST_ANSIBLE" ]]; then
-          echo "Post-Ansible: Server up!! Restarting Nexus instead of Start-Up ..."
-          restartNexus
-          checkNexusIsUp
+    if [[ "true" != "$RESTART_SONARQUBE_AFTER_ANSIBLE" ]]; then
+        if [[ "true" == "$PRESTART_SONARQUBE_IF_UP_POST_ANSIBLE" ]]; then
+          echo "Post-Ansible: Server up!! Restarting SonarQube instead of Start-Up ..."
+          restartSonarQube
+          checkSonarQubeIsUp
         else
-          echo "Post-Ansible: No start to apply, PRESTART_NEXUS_IF_UP_POST_ANSIBLE=$PRESTART_NEXUS_IF_UP_POST_ANSIBLE"
+          echo "Post-Ansible: No start to apply, PRESTART_SONARQUBE_IF_UP_POST_ANSIBLE=$PRESTART_SONARQUBE_IF_UP_POST_ANSIBLE"
         fi
     else
-      echo "Post-Ansible: No start to apply, waiting for Nexus Restart ..."
+      echo "Post-Ansible: No start to apply, waiting for SonarQube Restart ..."
     fi
-  fi
+  fi;
 fi
 
-#Check re-start Nexus ....
-if [[ "true" == "$RESTART_NEXUS_AFTER_ANSIBLE" ]]; then
-  echo "Post-Ansible: Restarting Nexus ..."
-  restartNexus
-  checkNexusIsUp
+#Check re-start SonarQube ....
+if [[ "true" == "$RESTART_SONARQUBE_AFTER_ANSIBLE" ]]; then
+  echo "Post-Ansible: Restarting SonarQube ..."
+  restartSonarQube
+  checkSonarQubeIsUp
 fi
+
+echo "SonarQube Ansible playbooks completed!!"
+
 
 #Check Nexus logs ....
-if [[ -e /opt/sonatype/nexus/logs/wrapper.log ]]; then
-  tail -f /opt/sonatype/nexus/logs/wrapper.log
+if [[ -e $SONARQUBE_HOME/logs/sonarqube.log ]]; then
+  tail -f $SONARQUBE_HOME/logs/sonarqube.log
 else
   #Wait forever ....
   touch $PLAYBOOK_FOLDER/.watchfile

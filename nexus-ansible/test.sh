@@ -25,7 +25,7 @@ HOSTNAME="nexus"
 RIGLETDOMAIN="riglet"
 PRESTART_NEXUS="false"
 POSTSTART_NEXUS="false"
-RESTART_NEXUS_AFTER_ANSIBLE="false"
+RESTART_NEXUS_AFTER_ANSIBLE="true"
 PRIVATE_PUBLIC_KEY_TAR_URL="https://github.com/hellgate75/online-keys/raw/master/20170311/nexus/keys.tar"
 docker run -d --privileged -e "MAIN_REPO_URL=$MAIN_REPO_URL" -e "PLAYBOOKS=$PLAYBOOKS" \
           -e "MAIN_REPO_BRANCH=$MAIN_REPO_BRANCH" -e "MAIN_REPO_FOLDER=$MAIN_REPO_FOLDER" -e "ROLES_REPO_URL=$ROLES_REPO_URL" \

@@ -1,0 +1,3 @@
+version: "1.0"
+product: "Ubuntu SonarQube BuildIt ansible container"
+ansible_user: root
