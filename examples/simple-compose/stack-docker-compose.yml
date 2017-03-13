@@ -29,6 +29,7 @@ services:
       - HOSTNAME=sonar-db
       - RIGLETDOMAIN=riglet
       - PRESTART_POSTGRES=true
+      - RESTART_POSTGRES_AFTER_ANSIBLE=false
       - POSTGRES_PASSWORD=4n4lys1s
       - POSTGRES_USER=sonarqube
       - POSTGRES_DB=sonarqube

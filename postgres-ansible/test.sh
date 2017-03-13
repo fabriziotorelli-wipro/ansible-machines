@@ -21,6 +21,7 @@ ANSIBLE_HOSTNAME="postgres"
 HOSTNAME="sonar-db"
 RIGLETDOMAIN="riglet"
 PRESTART_POSTGRES="true"
+RESTART_POSTGRES_AFTER_ANSIBLE="false"
 POSTGRES_PASSWORD="4n4lys1s"
 POSTGRES_USER="sonarqube"
 POSTGRES_DB="sonarqube"
@@ -33,6 +34,7 @@ docker run -d  --privileged -e "MAIN_REPO_URL=$MAIN_REPO_URL" -e "PLAYBOOKS=$PLA
           -e "USER_EMAIL=$USER_EMAIL" -e "USER_CREDENTIALS=$USER_CREDENTIALS" -e "ANSIBLE_HOSTNAME=$ANSIBLE_HOSTNAME" \
           -e "RIGLETDOMAIN=$RIGLETDOMAIN" -e "HOSTNAME=$HOSTNAME" -e "PRIVATE_PUBLIC_KEY_TAR_URL=$PRIVATE_PUBLIC_KEY_TAR_URL" \
           -e "POSTSTART_POSTGRES=$POSTSTART_POSTGRES" -e "PRESTART_POSTGRES=$PRESTART_POSTGRES" -e "container=docker" \
+          -e "RESTART_POSTGRES_AFTER_ANSIBLE=$RESTART_POSTGRES_AFTER_ANSIBLE" \
           -e "POSTGRES_DB=$POSTGRES_DB" -e "POSTGRES_OS_USER=$POSTGRES_OS_USER" -e "POSTGRES_OS_GROUP=$POSTGRES_OS_GROUP" \
           -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" --cap-add SYS_ADMIN --security-opt seccomp:unconfined -v /sys/fs/cgroup:/sys/fs/cgroup \
           -it --name postgresql-ansible-volumes builditftorelli/postgresql-ansible:9.6.2 echo "I am just a volume source!!"
@@ -46,6 +48,7 @@ docker run -d  -p 5432:5432 --privileged -e "MAIN_REPO_URL=$MAIN_REPO_URL" -e "P
           -e "USER_EMAIL=$USER_EMAIL" -e "USER_CREDENTIALS=$USER_CREDENTIALS" -e "ANSIBLE_HOSTNAME=$ANSIBLE_HOSTNAME" \
           -e "RIGLETDOMAIN=$RIGLETDOMAIN" -e "HOSTNAME=$HOSTNAME" -e "PRIVATE_PUBLIC_KEY_TAR_URL=$PRIVATE_PUBLIC_KEY_TAR_URL" \
           -e "POSTSTART_POSTGRES=$POSTSTART_POSTGRES" -e "PRESTART_POSTGRES=$PRESTART_POSTGRES" -e "container=docker" \
+          -e "RESTART_POSTGRES_AFTER_ANSIBLE=$RESTART_POSTGRES_AFTER_ANSIBLE" \
           -e "POSTGRES_DB=$POSTGRES_DB" -e "POSTGRES_OS_USER=$POSTGRES_OS_USER" -e "POSTGRES_OS_GROUP=$POSTGRES_OS_GROUP" \
           -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" --cap-add SYS_ADMIN --security-opt seccomp:unconfined \
           -v /sys/fs/cgroup:/sys/fs/cgroup -it --volumes-from postgresql-ansible-volumes \
