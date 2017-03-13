@@ -1,0 +1,44 @@
+version: "2"
+
+services:
+  nexus_volumes:
+    image: builditftorelli/postgresql-ansible:9.6.2
+    container_name: nexus-ansible-compose-volumes
+    entrypoint: ['/bin/bash']
+    command: ['/bin/bash']
+    volumes:
+        - /sys/fs/cgroup:/sys/fs/cgroup
+  nexus:
+    image: builditftorelli/nexus-ansible:oss
+    container_name: nexus-ansible-compose
+    privileged: true
+    restart: unless-stopped
+    domainname: nexus.riglet
+    hostname: nexus
+    environment:
+      - MAIN_REPO_URL=git@bitbucket.org:digitalrigbitbucketteam/digitalrig-riglet.git
+      - MAIN_REPO_BRANCH=microservices-poc-rancher
+      - MAIN_REPO_FOLDER=ec2
+      - ROLES_REPO_URL=git@bitbucket.org:digitalrigbitbucketteam/dr-scripts.git
+      - ROLES_REPO_BRANCH=microservices-poc-rancher
+      - ROLES_REPO_FOLDER=roles
+      - PLAYBOOKS=../nexus
+      - USER_NAME=fabriziotorelli
+      - USER_EMAIL=fabrizio.torelli@wipro.com
+      - USER_CREDENTIALS=
+      - ANSIBLE_HOSTNAME=nexus
+      - HOSTNAME=nexus
+      - RIGLETDOMAIN=riglet
+      - PRESTART_NEXUS=false
+      - POSTSTART_NEXUS=false
+      - RESTART_NEXUS_AFTER_ANSIBLE=true
+      - PRIVATE_PUBLIC_KEY_TAR_URL=https://github.com/hellgate75/online-keys/raw/master/20170311/nexus/keys.tar
+    ports:
+      - 8082:8081
+    cap_add:
+      - IPC_LOCK
+      - SYS_ADMIN
+    ulimits:
+      memlock: -1
+    volumes_from:
+      - nexus_volumes
