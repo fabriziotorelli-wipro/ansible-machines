@@ -2,7 +2,7 @@ version: "2"
 
 services:
   nexus_volumes:
-    image: builditftorelli/postgresql-ansible:9.6.2
+    image: builditftorelli/nexus-ansible:oss
     container_name: nexus-ansible-compose-volumes
     entrypoint: ['/bin/bash']
     command: ['/bin/bash']

@@ -2,7 +2,7 @@ version: "2"
 
 services:
   sonarqube_volumes:
-    image: builditftorelli/postgresql-ansible:9.6.2
+    image: builditftorelli/sonarqube-ansible:6.2
     container_name: sonarqube-ansible-compose-volumes
     entrypoint: ['/bin/bash']
     command: ['/bin/bash']
