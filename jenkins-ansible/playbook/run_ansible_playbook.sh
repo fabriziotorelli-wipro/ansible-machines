@@ -221,10 +221,10 @@ fi
 #Check Jenkins logs ....
 if [[ -e /var/log/jenkins/jenkins.log ]]; then
   tail -f /var/log/jenkins/jenkins.log
-else
-  #Wait forever ....
-  touch $PLAYBOOK_FOLDER/.watchfile
-  watch -n 86400 $PLAYBOOK_FOLDER/.watchfile
 fi
+
+#Wait forever ....
+touch $PLAYBOOK_FOLDER/.watchfile
+watch -n 86400 $PLAYBOOK_FOLDER/.watchfile
 
 echo "Leaving file $PLAYBOOK_FOLDER/run_ansible_playbook.sh ..."

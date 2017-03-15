@@ -202,10 +202,10 @@ fi
 #Check Nexus logs ....
 if [[ -e /opt/sonatype/nexus/logs/wrapper.log ]]; then
   tail -f /opt/sonatype/nexus/logs/wrapper.log
-else
-  #Wait forever ....
-  touch $PLAYBOOK_FOLDER/.watchfile
-  watch -n 86400 $PLAYBOOK_FOLDER/.watchfile
 fi
+
+#Wait forever ....
+touch $PLAYBOOK_FOLDER/.watchfile
+watch -n 86400 $PLAYBOOK_FOLDER/.watchfile
 
 echo "Leaving file $PLAYBOOK_FOLDER/run_ansible_playbook.sh ..."
