@@ -14,7 +14,7 @@ At the moment we have following container images Ansible playbbok driven :
 
 Planning on : CouchDb, Convox and other docker images.
 
-# RIG technology
+## RIG technology
 
 RIG is a Buildit concept around the deployment of architectures in the cloud, with a resilient and dynamic approach.
 
