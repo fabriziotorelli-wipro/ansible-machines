@@ -26,4 +26,4 @@ Any topic about execution is available in each image repositiory in [DockerHub](
 
 ## License
 
-[MIT](/License.md)
+[MIT](/LICENSE)
