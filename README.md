@@ -16,7 +16,11 @@ Planning on : CouchDb, Convox and other docker images.
 
 ## RIG technology
 
-RIG is a Buildit concept around the deployment of architectures in the cloud, with a resilient and dynamic approach.
+## RIG technology
+
+RIG is a Buildit concept around the deployment of architectures in the cloud, with a resilient and dynamic approach. RIG is designed to live in any cloud provider. Buildit continuously improve the experience with innovations and sophisticated architectural solutions. In the RIG Rancher Orchestration experience it will available the deployment of multiple cloud providers and multi-purpose platform architectures.
+
+[Buildit](https://buildit.digital/) is a World-Wide Digital Business Transformation company of [Wipro Digital](http://wiprodigital.com/) group. 
 
 Take a look at [Buildit](https://buildit.digital/) or [Wipro Digital](http://wiprodigital.com/) web sites for more information.
 
