@@ -12,7 +12,7 @@ At the moment we have following container images Ansible playbbok driven :
 * SonarQube
 * PostgreSQL
 
-Planning on : CouchDb, Convox and other imeges.
+Planning on : CouchDb, Convox and other docker images.
 
 ## Build
 
