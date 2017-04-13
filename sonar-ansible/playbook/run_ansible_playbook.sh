@@ -15,13 +15,13 @@ function configuringHosts {
   echo "Configuring ansible host to : $ANSIBLE_HOSTNAME"
   echo "Configuring machine host to : $HOSTNAME"
   echo "Configuring machine riglet domain to : $RIGLETDOMAIN"
-  sudo cat /etc/hosts > /var/jenkins_home/hosts
-  sudo chown jenkins:jenkins /var/jenkins_home/hosts
-  echo "127.0.0.1  localhost localhost.localdomain localhost.$RIGLETDOMAIN" >> /var/jenkins_home/hosts
-  echo "127.0.0.1  $HOSTNAME   $HOSTNAME.$RIGLETDOMAIN" >> /var/jenkins_home/hosts
+  sudo cat /etc/hosts > /root/hosts
+  sudo chown root:root /root/hosts
+  echo "127.0.0.1  localhost localhost.localdomain localhost.$RIGLETDOMAIN" >> /root/hosts
+  echo "127.0.0.1  $HOSTNAME   $HOSTNAME.$RIGLETDOMAIN" >> /root/hosts
   sudo chmod 777 /etc/hosts
-  sudo cat /var/jenkins_home/hosts > /etc/hosts
-  rm -f  /var/jenkins_home/hosts
+  sudo cat /root/hosts > /etc/hosts
+  rm -f  /root/hosts
   echo "New hosts file :"
   sudo cat /etc/hosts
 }
