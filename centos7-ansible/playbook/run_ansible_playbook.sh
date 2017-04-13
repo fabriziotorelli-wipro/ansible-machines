@@ -1,13 +1,25 @@
 #!/bin/bash
 /usr/sbin/init
 
-PREPARED="$(ls /opt/ansible/playbook/.prepared)"
-if [[ -z "$PREPARED" ]]; then
-#  ansible-playbook -c local -i ./inventory/localhost  playbook.yml
+function configuringHosts {
   echo "Configuring ansible host to : $ANSIBLE_HOSTNAME"
   echo "Configuring machine host to : $HOSTNAME"
   echo "Configuring machine riglet domain to : $RIGLETDOMAIN"
-  echo "127.0.0.1  $HOSTNAME   $HOSTNAME.$RIGLETDOMAIN" > /etc/hosts
+  sudo cat /etc/hosts > /var/jenkins_home/hosts
+  sudo chown jenkins:jenkins /var/jenkins_home/hosts
+  echo "127.0.0.1  localhost localhost.localdomain localhost.$RIGLETDOMAIN" >> /var/jenkins_home/hosts
+  echo "127.0.0.1  $HOSTNAME   $HOSTNAME.$RIGLETDOMAIN" >> /var/jenkins_home/hosts
+  sudo chmod 777 /etc/hosts
+  sudo cat /var/jenkins_home/hosts > /etc/hosts
+  rm -f  /var/jenkins_home/hosts
+  echo "New hosts file :"
+  sudo cat /etc/hosts
+}
+
+PREPARED="$(ls /opt/ansible/playbook/.prepared)"
+if [[ -z "$PREPARED" ]]; then
+#  ansible-playbook -c local -i ./inventory/localhost  playbook.yml
+  configuringHosts
   cp ./inventory/localhost ./inventory/$ANSIBLE_HOSTNAME
   echo "$ANSIBLE_HOSTNAME      ansible_connection=local" >> ./inventory/$ANSIBLE_HOSTNAME
   git config --global --add user.name $USER_NAME
@@ -58,6 +70,13 @@ if [[ -z "$INSTALLED" ]]; then
   fi
 fi
 echo "All done!!"
+
+MACHINE_HOST="$(hostname)"
+if [[ "$HOSTNAME.$RIGLETDOMAIN" != "$MACHINE_HOST" ]]; then
+  configuringHosts
+  echo "Setting up host to $HOSTNAME.$RIGLETDOMAIN ..."
+  sudo hostname $HOSTNAME.$RIGLETDOMAIN
+fi
 
 #while (true) do sleep 86400; done
 tail -f /opt/ansible/playbook/run_ansible_playbook.sh

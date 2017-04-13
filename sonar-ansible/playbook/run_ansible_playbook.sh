@@ -11,6 +11,21 @@ if [[ "true" == "$PRESTART_SONARQUBE" ]]; then
   checkSonarQubeIsUp
 fi
 
+function configuringHosts {
+  echo "Configuring ansible host to : $ANSIBLE_HOSTNAME"
+  echo "Configuring machine host to : $HOSTNAME"
+  echo "Configuring machine riglet domain to : $RIGLETDOMAIN"
+  sudo cat /etc/hosts > /var/jenkins_home/hosts
+  sudo chown jenkins:jenkins /var/jenkins_home/hosts
+  echo "127.0.0.1  localhost localhost.localdomain localhost.$RIGLETDOMAIN" >> /var/jenkins_home/hosts
+  echo "127.0.0.1  $HOSTNAME   $HOSTNAME.$RIGLETDOMAIN" >> /var/jenkins_home/hosts
+  sudo chmod 777 /etc/hosts
+  sudo cat /var/jenkins_home/hosts > /etc/hosts
+  rm -f  /var/jenkins_home/hosts
+  echo "New hosts file :"
+  sudo cat /etc/hosts
+}
+
 function startSonarQube {
   # RUN_AS_USER=root
   start-sonarqube.sh
@@ -91,16 +106,7 @@ if [[ -z "$PREPARED" ]]; then
   echo "|   sonarqube-status.sh                                         |"
   echo "+---------------------------------------------------------------+"
   echo "Starting SonarQube Ansible Playbooks ..."
-  echo "Configuring ansible host to : $ANSIBLE_HOSTNAME"
-  echo "Configuring machine host to : $HOSTNAME"
-  echo "Configuring machine riglet domain to : $RIGLETDOMAIN"
-  cat /etc/hosts > /root/hosts
-  echo "127.0.0.1  localhost localhost.localdomain localhost.$RIGLETDOMAIN" >> /root/hosts
-  echo "127.0.0.1  $HOSTNAME   $HOSTNAME.$RIGLETDOMAIN" >> /root/hosts
-  cat /root/hosts > /etc/hosts
-  rm -f  /root/hosts
-  echo "New hosts file :"
-  cat /etc/hosts
+  configuringHosts
   cp $PLAYBOOK_FOLDER/inventory/localhost $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
   echo "$ANSIBLE_HOSTNAME      ansible_connection=local" >> $PLAYBOOK_FOLDER/inventory/$ANSIBLE_HOSTNAME
   #Defining your credential for jenkins
@@ -151,6 +157,7 @@ fi
 #Check and define the hostname ....
 MACHINE_HOST="$(hostname)"
 if [[ "$HOSTNAME.$RIGLETDOMAIN" != "$MACHINE_HOST" ]]; then
+  configuringHosts
   echo "Setting up host to $HOSTNAME.$RIGLETDOMAIN ..."
   sudo hostname $HOSTNAME.$RIGLETDOMAIN
 fi
